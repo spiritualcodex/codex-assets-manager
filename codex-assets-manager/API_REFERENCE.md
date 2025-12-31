@@ -33,14 +33,37 @@ Response
 Scan Project
 GET /vault/ingest/{ingestId}/scan
 
+Performs static analysis on project manifests and files to detect providers, runtime type, and required capabilities.
+
+- No secrets returned (only names)
+- Fails closed on ambiguity
+- All requests audited
 
 Response
 
 {
-  "providers": ["gemini"],
-  "runtime": "hybrid",
-  "requestedCapabilities": ["ai.gemini.inference"],
-  "warnings": []
+  "success": true,
+  "data": {
+    "ingestId": "abc123",
+    "requestId": "scan_abc123_1234567890",
+    "status": "success",
+    "report": {
+      "providers": ["gemini"],
+      "runtime": "hybrid",
+      "requestedCapabilities": ["ai.gemini.inference"],
+      "requiredSecrets": ["GEMINI_API_KEY"],
+      "warnings": [],
+      "filesScanned": ["package.json", "src/main.js"]
+    }
+  }
+}
+
+Failure (ambiguous providers)
+
+{
+  "success": false,
+  "error": "Ambiguous providers detected: openai, gemini",
+  "code": "AMBIGUOUS_PROVIDERS"
 }
 
 Bind to Vault
