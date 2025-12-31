@@ -66,13 +66,69 @@ Failure (ambiguous providers)
   "code": "AMBIGUOUS_PROVIDERS"
 }
 
-Bind to Vault
+Bind to Vault (Phase 3A: Decision Only)
 POST /vault/ingest/{ingestId}/bind
 
+Transforms MatchEligibility into a BindDecision.
 
-Response
+- Evaluates if match can proceed (all checks from Scan/Eligibility)
+- Lists required secret leases (not issued yet — Phase 3B)
+- Fails closed if any requirement is unmet
 
-{ "assetId": "asset_001" }
+Request Body
+
+{
+  "matchEligibility": {
+    "ingestId": "abc123",
+    "eligible": true,
+    "squad": ["openai"],
+    "formations": ["ai.openai.inference"],
+    "clearance": ["OPENAI_API_KEY"],
+    "stadiumRules": "frontend"
+  }
+}
+
+Success Response (Approved)
+
+{
+  "success": true,
+  "data": {
+    "ingestId": "abc123",
+    "requestId": "bind_abc123_1234567890",
+    "status": "approved_pending_secrets",
+    "decision": {
+      "allowed": true,
+      "squad": ["openai"],
+      "formations": ["ai.openai.inference"],
+      "leasesRequired": [
+        {
+          "name": "OPENAI_API_KEY",
+          "type": "secret_lease",
+          "status": "pending_issuance"
+        }
+      ],
+      "reasons": []
+    }
+  }
+}
+
+Rejection Response
+
+{
+  "success": true,
+  "data": {
+    "ingestId": "abc123",
+    "requestId": "bind_abc123_1234567890",
+    "status": "rejected",
+    "decision": {
+      "allowed": false,
+      "leasesRequired": [],
+      "reasons": [
+        "EMPTY_SQUAD: No providers detected"
+      ]
+    }
+  }
+}
 
 Assets
 List Assets
