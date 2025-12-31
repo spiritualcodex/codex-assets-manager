@@ -1,0 +1,1 @@
+﻿MCP servers and browser DevTools are treated as specialist agents providing live telemetry, inspection, and diagnostics to Codex Manager and Tactical Agents. They hold no authority and cannot execute changes directly.
