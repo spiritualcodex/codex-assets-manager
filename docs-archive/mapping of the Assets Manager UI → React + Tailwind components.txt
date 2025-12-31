@@ -1,0 +1,349 @@
+Excellent. Below is a clean, implementation-ready mapping of the Assets Manager UI → React + Tailwind components, designed to sit directly on top of the Vault Ingest Engine.
+
+This is written so:
+
+Gemini-generated UIs can align instantly
+
+Codex Builder / Autopilot can scaffold it automatically
+
+Nothing leaks secrets
+
+Everything stays Vault-first
+
+🧱 Frontend Stack Assumptions
+
+React (Vite / Next / Remix compatible)
+
+Tailwind CSS (production build, no CDN)
+
+Component-first architecture
+
+API-driven state (Vault is source of truth)
+
+No local business logic.
+No hidden state.
+
+🧠 Component Hierarchy (Canonical)
+<AppShell>
+ ├─ <TopBar />
+ ├─ <Sidebar />
+ └─ <MainPanel>
+     └─ <RouteView />
+
+
+Everything lives inside AppShell.
+
+1️⃣ AppShell (Root Layout)
+Responsibility
+
+Layout grid
+
+Auth gate (Vault session check)
+
+Global error boundary
+
+<AppShell>
+  <TopBar />
+  <div className="flex h-full">
+    <Sidebar />
+    <MainPanel />
+  </div>
+</AppShell>
+
+
+Tailwind:
+
+min-h-screen bg-slate-950 text-slate-100
+
+2️⃣ TopBar
+Component
+
+components/layout/TopBar.tsx
+
+Displays
+
+Vault status
+
+Founder identity
+
+Live pulse indicator
+
+<TopBar
+  vaultStatus="secure"
+  identity="Founder"
+  activeAssets={7}
+/>
+
+
+Tailwind ideas:
+
+Subtle glow on status
+
+Fixed height
+
+Calm, non-animated
+
+3️⃣ Sidebar (Asset-First Nav)
+Component
+
+components/layout/Sidebar.tsx
+
+Items
+[
+  "Assets",
+  "Ingest",
+  "Vault",
+  "Activity",
+  "System"
+]
+
+
+Each maps to a route.
+
+Tailwind:
+
+w-64 border-r border-slate-800 bg-slate-900
+
+
+No icons unless meaningful.
+
+4️⃣ Routing Layer
+Component
+
+components/layout/MainPanel.tsx
+
+Uses:
+
+React Router or Next app router
+
+<Routes>
+  <Route path="/assets" element={<AssetsList />} />
+  <Route path="/assets/:id" element={<AssetDetail />} />
+  <Route path="/ingest" element={<IngestView />} />
+  <Route path="/vault" element={<VaultView />} />
+  <Route path="/activity" element={<ActivityLog />} />
+  <Route path="/system" element={<SystemControls />} />
+</Routes>
+
+5️⃣ IngestView (Absorb an App)
+Components
+IngestView
+ ├─ UploadZone
+ ├─ ScanResults
+ └─ BindAction
+
+UploadZone
+
+Drag / select folder or zip
+No preview, no file browsing.
+
+ScanResults
+
+Read-only JSON-like panel:
+
+Detected Providers:
+• Gemini
+
+Requested Capabilities:
+• ai.gemini.inference
+
+BindAction
+
+Single button:
+
+“Bind to Vault”
+
+No undo.
+
+6️⃣ AssetsList (Living Codex)
+Component
+
+components/assets/AssetsList.tsx
+
+Uses:
+
+<AssetCard />
+
+<AssetCard
+  name="Soul Decoder"
+  status="managed"
+  runtime="hybrid"
+  providers={["Gemini"]}
+  lastEvent="12s ago"
+/>
+
+
+Grid or list (toggle optional).
+
+Tailwind:
+
+grid grid-cols-1 xl:grid-cols-2 gap-4
+
+7️⃣ AssetDetail (Control Without Touch)
+Component
+
+components/assets/AssetDetail.tsx
+
+Tabs:
+
+Overview | Permissions | Runtime | Logs | Health
+
+
+Each tab = its own component.
+
+7a️⃣ PermissionsTab
+
+Toggle capabilities, not secrets.
+
+<CapabilityToggle
+  label="ai.gemini.inference"
+  enabled={true}
+/>
+
+
+Behind the scenes:
+
+Calls Vault permission endpoint
+
+No frontend state authority
+
+7b️⃣ RuntimeTab
+
+Controls:
+
+Start
+
+Pause
+
+Restart
+
+<RuntimeControls assetId="abc123" />
+
+
+Buttons are disabled unless Vault approves.
+
+7c️⃣ LogsTab
+
+Streaming, read-only.
+
+<LogStream assetId="abc123" />
+
+
+WebSocket or SSE
+
+Append-only
+
+Timestamped
+
+8️⃣ VaultView (Secrets Without Exposure)
+Component
+
+components/vault/VaultView.tsx
+
+Shows:
+
+Providers
+
+Usage counts
+
+Rotation status
+
+<ProviderCard
+  name="Gemini"
+  usage={4}
+  status="healthy"
+/>
+
+
+Buttons:
+
+Rotate
+
+Pause
+
+Revoke (per asset)
+
+Never show keys. Ever.
+
+9️⃣ ActivityLog (Immutable Truth)
+Component
+
+components/activity/ActivityLog.tsx
+
+<ActivityItem
+  time="12:44"
+  message="Asset X requested ai.gemini.inference → APPROVED"
+/>
+
+
+No filters initially.
+Truth > convenience.
+
+🔟 SystemControls (Kill Switch)
+Component
+
+components/system/SystemControls.tsx
+
+Danger zone styling:
+
+Red border
+
+Confirmation modal
+
+Deliberate spacing
+
+Actions:
+
+Lock all assets
+
+Pause Vault outbound
+
+Emergency shutdown
+
+No animations.
+
+🧬 State Management Rule (Critical)
+
+Frontend never decides.
+
+No Redux for authority
+
+No optimistic updates
+
+Vault responses drive UI state
+
+Frontend = lens, not brain.
+
+🎨 Tailwind Design Tokens (Recommended)
+bg: slate-950
+panel: slate-900
+border: slate-800
+accent: cyan-400
+danger: red-500
+
+
+Soft glow only for status, never for actions.
+
+🧠 Why this maps perfectly to your system
+
+Gemini UIs → component-friendly
+
+Vault → API-first
+
+Assets Manager → pure control plane
+
+Autopilot → can scaffold this instantly
+
+You’ve now got:
+
+Architecture
+
+Contract
+
+Engine
+
+UI
+
+Component map
+
+That’s platform-grade completeness.

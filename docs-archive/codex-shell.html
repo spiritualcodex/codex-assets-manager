@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Codex | Manager's Office Bridge</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+    :root {
+      --office-blue: #00d4ff;
+      --deep-space: #020617;
+    }
+
+    body {
+      background-color: var(--deep-space);
+      color: #f0f0f0;
+      font-family: 'Outfit', sans-serif;
+      height: 100vh;
+      margin: 0;
+      display: flex;
+    }
+
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    .sidebar {
+      width: 260px;
+      background: rgba(1, 4, 18, 0.9);
+      border-right: 1px solid rgba(255,255,255,0.05);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .main-stage {
+      flex: 1;
+      padding: 40px;
+      background: radial-gradient(circle at top right, rgba(0, 212, 255, 0.03), transparent);
+    }
+
+    .build-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+    }
+
+    .terminal-feed {
+      background: #000;
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 12px;
+      height: 240px;
+      overflow-y: auto;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--office-blue);
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    .btn-prime {
+      background: var(--office-blue);
+      color: #000;
+      font-weight: 700;
+    }
+  </style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+  <h1 class="text-lg font-bold mb-6">Codex Manager</h1>
+  <div class="text-xs mono text-gray-600 mt-auto">IFRAME_NODE_READY</div>
+</aside>
+
+<main class="main-stage">
+
+  <h2 class="text-3xl font-bold mb-8">System Deployment</h2>
+
+  <div class="grid grid-cols-2 gap-6 mb-6">
+    <div class="build-card p-5">
+      <p class="text-sm text-gray-300">Awaiting Decider Manifest</p>
+    </div>
+
+    <div class="build-card p-5">
+      <button id="triggerBtn"
+        onclick="startBuildProcess()"
+        class="btn-prime w-full py-4 rounded-lg uppercase tracking-widest">
+        Initiate Build
+      </button>
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <div class="flex justify-between text-[10px] mono text-gray-500 mb-2">
+      <span id="statusLabel">OFFICE STATUS: READY</span>
+      <span id="progressText">0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <div class="terminal-feed mono" id="officeLogs">
+    <div>> MANAGER ONLINE. WAITING FOR SHELL.</div>
+  </div>
+
+</main>
+
+<script>
+/* ============================
+   UI Helpers
+============================ */
+
+function log(msg) {
+  const feed = document.getElementById('officeLogs');
+  const line = document.createElement('div');
+  line.textContent = "> " + msg;
+  feed.appendChild(line);
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function updateProgress(val) {
+  document.getElementById('progressFill').style.width = val + '%';
+  document.getElementById('progressText').innerText = val + '%';
+}
+
+/* ============================
+   BUILD SIMULATION
+============================ */
+
+async function startBuildProcess() {
+  document.getElementById('statusLabel').innerText = "OFFICE STATUS: BUILDING";
+  postStatus("BUILDING");
+
+  for (let p of [15, 35, 60, 85, 100]) {
+    await new Promise(r => setTimeout(r, 700));
+    updateProgress(p);
+    log("Progress " + p + "%");
+  }
+
+  document.getElementById('statusLabel').innerText = "OFFICE STATUS: MONITORING";
+  postStatus("MONITORING");
+}
+
+/* ============================
+   CODEX postMessage BRIDGE
+   (Manager → Shell)
+============================ */
+
+function postStatus(status) {
+  window.parent.postMessage({
+    __codex: true,
+    type: "MANAGER:STATUS",
+    payload: { status }
+  }, "*");
+}
+
+window.addEventListener("message", (event) => {
+  const data = event.data;
+  if (!data || !data.__codex) return;
+
+  // Handshake
+  if (data.type === "SHELL:HELLO") {
+    log("Shell connected");
+    event.source.postMessage({
+      __codex: true,
+      replyTo: data.requestId,
+      ok: true,
+      payload: { manager: "ready" }
+    }, "*");
+
+    postStatus("CONNECTED");
+  }
+});
+</script>
+
+</body>
+</html>

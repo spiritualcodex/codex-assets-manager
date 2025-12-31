@@ -1,0 +1,133 @@
+1️⃣ Vault Internal Module Map (very important)
+
+Codex Builder needs a file-level mental map, not logic.
+
+You should add (even as a stub doc):
+
+src/
+├─ auth/          # session + identity validation
+├─ permissions/   # capability enforcement
+├─ secrets/       # provider key storage + rotation
+├─ ingest/        # scan, resolver, binder
+├─ registry/      # assets + ownership
+├─ runtime/       # approval + mediation
+├─ audit/         # immutable logs
+└─ api/           # HTTP interface
+
+
+📌 This tells the Builder where things live without telling it how.
+
+2️⃣ Vault Data Model (lightweight)
+
+Not SQL, not schemas — just entities.
+
+Add a short doc or comment describing:
+
+Asset
+
+Capability
+
+Provider
+
+Grant
+
+Session
+
+AuditEvent
+
+No fields needed yet — just names + purpose.
+
+This prevents data-model drift later.
+
+3️⃣ Vault Boot Sequence (startup order)
+
+One paragraph is enough:
+
+Load config
+
+Load providers
+
+Load permissions
+
+Lock system until healthy
+
+Accept requests
+
+This avoids race-condition bugs in first builds.
+
+4️⃣ Explicit Non-Goals (Builder safety rail)
+
+You already implied these, but write them explicitly in the Vault README or a NOTES.md:
+
+No background jobs yet
+
+No user tiers yet
+
+No billing
+
+No UI
+
+No agent autonomy
+
+This stops “helpful overbuilding.”
+
+🟢 What you do NOT need yet (and should NOT add)
+
+Do not add:
+
+❌ Database choice (Supabase/Postgres/etc.)
+
+❌ Encryption implementation details
+
+❌ Provider SDK code
+
+❌ Caching layers
+
+❌ Performance optimizations
+
+❌ Multi-region logic
+
+Those come after the first secure spine exists.
+
+🎯 Verdict (clear answer)
+Are you missing anything critical?
+
+No.
+
+Are you missing anything useful for the Builder?
+
+Yes — just 3 lightweight scaffolding docs:
+
+Internal module map
+
+Entity list
+
+Boot sequence
+
+These are 1–2 pages total, not weeks of work.
+
+🚀 What I recommend you do next (best move)
+
+Add a small file:
+
+codex-vault/ARCHITECTURE.md
+
+
+with:
+
+Module map
+
+Entity list
+
+Boot order
+
+Non-goals
+
+Commit it with:
+
+docs(vault): add internal architecture scaffolding for builder
+
+
+Then hand the full folder to Codex Builder with the mission you already have.
+
+At that point, the Builder can execute without guessing.

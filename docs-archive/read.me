@@ -1,0 +1,200 @@
+# Codex Vault
+
+The authoritative security boundary for Codex system execution.
+
+## What This Is
+
+Codex Vault is a **secrets management and permission enforcement layer** that:
+
+- Stores provider API keys securely
+- Enforces capability-based permissions
+- Mediates all runtime provider access
+- Maintains immutable audit logs
+- Controls asset lifecycle
+
+**Zero-trust by design.** No client has implicit authority.
+
+## What This Is NOT
+
+- ❌ Not an app deployment tool
+- ❌ Not a UI framework
+- ❌ Not a general-purpose backend
+- ❌ Not a database abstraction
+- ❌ Not a build system
+
+The Vault does **one job**: control.
+
+## Architecture
+
+```
+Vault Architecture:
+   Assets Manager (UI) 
+          ↓
+       Vault (authority)
+          ↓
+   Shell / Apps / Agents
+```
+
+All privileged operations flow through the Vault.
+
+## Repository Structure
+
+```
+codex-vault/
+├─ docs/
+│  ├─ SECURITY.md         # Security policy
+│  ├─ THREAT_MODEL.md     # Threat assumptions
+│  ├─ API_REFERENCE.md    # API contract
+│  └─ ARCHITECTURE.md     # Internal structure
+├─ src/
+│  ├─ auth/               # Session validation
+│  ├─ permissions/        # Capability enforcement
+│  ├─ secrets/            # Provider key storage
+│  ├─ ingest/             # Asset scanning + binding
+│  ├─ registry/           # Asset registration
+│  ├─ runtime/            # Request mediation
+│  ├─ audit/              # Immutable logging
+│  └─ api/                # HTTP interface
+└─ package.json
+```
+
+## Core Principles
+
+1. **Secrets never leave the Vault** — Injection only, never return
+2. **All requests validated** — Server-side authority checks
+3. **Capability-based permissions** — Not role-based (v1)
+4. **Immutable audit trail** — Append-only logs
+5. **Fail closed** — Deny on uncertainty
+
+## Key Concepts
+
+### Asset
+A managed application registered in the Vault. Has:
+- Unique ID
+- Owner (Founder in v1)
+- Requested capabilities
+- Runtime state
+
+### Capability
+A permission scope like `ai.gemini.inference`. Assets request capabilities during ingest.
+
+### Provider
+An external service (Gemini, OpenAI, etc.) with stored credentials.
+
+### Grant
+A time-bound permission approval for an asset to use a capability.
+
+### Ingest Engine
+The subsystem that:
+1. Scans uploaded projects
+2. Detects provider usage
+3. Maps to capabilities
+4. Binds assets to Vault
+
+**No code rewrites. No builds. Read-only scanning.**
+
+## Security Model
+
+Read `docs/SECURITY.md` for full policy.
+
+**Quick summary:**
+- Vault is the only source of truth
+- UI role checks are informational only
+- Agent requests have zero implicit trust
+- All privileged actions require explicit authorization
+
+## API Surface
+
+Read `docs/API_REFERENCE.md` for complete specification.
+
+**All endpoints enforce:**
+- Authentication
+- Authorization
+- Audit logging
+- No secret exposure
+
+## Implementation Status
+
+**Current Phase:** Normalized scaffolding complete
+
+**Next Phase:** Codex Builder implementation
+
+**Not Yet Implemented:**
+- Database layer
+- Encryption specifics
+- Provider SDK integration
+- Caching strategy
+- Performance optimization
+
+These come after the secure spine exists.
+
+## Development Guidelines
+
+### For Contributors
+
+1. Read `docs/SECURITY.md` first
+2. Never return secrets in responses
+3. Always validate server-side
+4. Log all privileged actions
+5. Fail closed on errors
+
+### Prohibited Changes
+
+The following are **forbidden**:
+
+- Returning secrets in API responses
+- Adding debug flags that bypass auth
+- Trusting client-provided permissions
+- Hardcoding credentials
+- Silent authorization fallbacks
+
+Any such change must be reverted immediately.
+
+## Deployment
+
+The Vault:
+- Runs as a standalone service
+- Has no UI components
+- Exposes only HTTP APIs
+- Stores secrets encrypted at rest
+- Rotates keys without client redeployment
+
+**Single point of control.** If Vault fails, system halts.
+
+## Threat Model
+
+Read `docs/THREAT_MODEL.md` for complete analysis.
+
+**Primary threats:**
+1. UI compromise
+2. Agent escalation
+3. Secret exfiltration
+4. Ingest abuse
+5. Replay attacks
+6. Privilege drift
+7. Insider error
+
+**Mitigation:** Defense in depth, zero-trust, capability enforcement.
+
+## Testing Strategy
+
+(To be implemented by Builder)
+
+Required test coverage:
+- Session validation
+- Permission enforcement
+- Secret isolation
+- Audit integrity
+- API contract compliance
+
+## Support
+
+This is a **Founder-only** system in v1.
+
+For security issues, see `docs/SECURITY.md`.
+
+## Philosophy
+
+> "If it doesn't go through the Vault, it doesn't exist."
+
+The Vault is not a feature. It is the security boundary.

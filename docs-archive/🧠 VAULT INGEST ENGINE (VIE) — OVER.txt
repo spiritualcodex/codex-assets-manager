@@ -1,0 +1,219 @@
+🧠 VAULT INGEST ENGINE (VIE) — OVERVIEW
+
+Mission:
+Turn an uploaded project folder into a Vault-managed asset with:
+
+Runtime API key abstraction
+
+Permission enforcement
+
+Shell execution harness
+
+Zero code rewrites
+
+🧱 High-Level Architecture
+4
+Upload → Scanner → Resolver → Binder → Registrar → Managed Asset
+
+1️⃣ Upload Gateway (Ingress)
+Purpose
+
+Accept a project folder safely and deterministically.
+
+Interface
+
+Input: .zip or directory
+
+Output: immutable snapshot (assetHash)
+
+Rules
+
+Virus scan
+
+Size & file-type limits
+
+.env, secrets, build outputs ignored
+
+Read-only mount
+
+Output:
+/vault/assets/{assetHash}/raw
+
+2️⃣ Scanner Engine (Read-Only Analysis)
+Purpose
+
+Understand the app without executing it.
+
+Detects
+
+AI providers (Gemini, OpenAI, etc.)
+
+API call signatures
+
+Env access patterns
+
+Runtime type (frontend / backend / hybrid)
+
+Entry points
+
+Outputs
+{
+  "providers": ["gemini"],
+  "runtime": "hybrid",
+  "envUsage": ["API_KEY"],
+  "entryPoints": ["src/index.ts"]
+}
+
+
+No mutation. Ever.
+
+3️⃣ Resolver Engine (Intent Mapping)
+Purpose
+
+Translate “what the app wants” into Vault-approved actions.
+
+Example
+App Intent	Vault Action
+Gemini inference	ai.gemini.inference
+Image generation	ai.stability.image
+Speech	ai.elevenlabs.tts
+Output
+{
+  "requestedCapabilities": [
+    "ai.gemini.inference"
+  ]
+}
+
+
+This is where Gemini friendliness shines.
+
+4️⃣ Binder Engine (Runtime Glue)
+Purpose
+
+Create bindings without touching app code.
+
+Generates
+/vault-bindings/{assetId}/
+  ├─ bindings.map.json
+  ├─ provider-shims/
+  └─ runtime-hooks/
+
+What it does
+
+Intercepts SDK init
+
+Replaces key access at runtime
+
+Routes all provider calls through Vault
+
+The app believes it has access.
+The Vault actually does.
+
+5️⃣ Shell Generator (Execution Harness)
+Purpose
+
+Wrap the app in a controllable shell.
+
+Generates
+/shell/{assetId}/
+  ├─ start.mjs
+  ├─ health.mjs
+  ├─ permissions.mjs
+
+Shell Responsibilities
+
+Boot app
+
+Enforce Vault permissions
+
+Stream logs
+
+Handle shutdown / pause
+
+Shell is stateless. Vault is authority.
+
+6️⃣ Registrar Engine (Asset Registry)
+Purpose
+
+Make the app a first-class Codex asset.
+
+Registers
+{
+  "assetId": "auto",
+  "owner": "founder",
+  "permissions": ["ai.gemini.inference"],
+  "status": "managed",
+  "hash": "immutable"
+}
+
+
+Assets Manager now sees it instantly.
+
+7️⃣ Enforcement Layer (Always-On)
+
+Every runtime request must pass:
+
+App → Shell → Vault → Provider
+
+
+Vault enforces:
+
+Identity
+
+Permission
+
+Rate limits
+
+Key rotation
+
+Kill-switch
+
+No Vault approval = no execution.
+
+🔐 Security Guarantees (Non-Negotiable)
+
+❌ No secrets in app
+
+❌ No secrets in shell
+
+❌ No secrets in agents
+
+❌ No secrets in frontend
+
+✅ Vault only
+
+Keys are injected per request, per scope, per app.
+
+🧬 Why this works perfectly with Gemini-built apps
+
+Gemini apps are:
+
+Convention-based
+
+Predictable
+
+Structured
+
+Folder-aware
+
+So the Ingest Engine:
+
+Infers intent
+
+Auto-maps capabilities
+
+Avoids rebuilds entirely
+
+🚀 What this unlocks immediately
+
+One-click app onboarding
+
+Infinite Gemini app scaling
+
+Founder-only control plane
+
+SaaS-ready future tiers
+
+Zero security retrofits
+
+You’re now operating at platform level, not app level.
