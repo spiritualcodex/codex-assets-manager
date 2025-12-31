@@ -1,3 +1,17 @@
-﻿# models registry placeholder
-# Add entries like:
-# claude-haiku-4.5: enabled
+﻿# Models registry (repo-level model availability registry)
+# This file declares model availability for Codex Manager / local tooling.
+# Authority and execution remain controlled by the Vault; this registry only
+# signals which models should be exposed or considered by builders/agents.
+
+models:
+	claude-haiku-4.5:
+		enabled: true
+		exposure: all-clients
+		rollout: immediate
+		description: "Enable Claude Haiku 4.5 as available to all local clients. Does not grant execution authority."
+		metadata:
+			created-by: automation
+			created-at: "2025-12-31"
+			source: repo-config
+
+# Add additional models under `models:` using the same structure.
