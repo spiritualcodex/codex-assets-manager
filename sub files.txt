@@ -1,0 +1,367 @@
+// ==================================
+// codex-vault/src/auth/index.ts
+// ==================================
+/**
+ * Authentication & Session Management
+ * 
+ * Responsibilities:
+ * - Validate session tokens
+ * - Verify identity claims
+ * - Issue session credentials
+ * - Handle session expiration
+ * 
+ * Security notes:
+ * - All requests must have valid session
+ * - Founder-only in v1
+ * - No API keys in responses
+ */
+
+export interface Session {
+  identity: string;
+  role: string;
+  vaultStatus: 'secure' | 'degraded' | 'locked';
+  expiresAt?: number;
+}
+
+export async function validateSession(token: string): Promise<Session | null> {
+  // TODO: Implement session validation
+  throw new Error('Not implemented');
+}
+
+export async function createSession(identity: string): Promise<string> {
+  // TODO: Implement session creation
+  throw new Error('Not implemented');
+}
+
+// ==================================
+// codex-vault/src/permissions/index.ts
+// ==================================
+/**
+ * Capability Enforcement
+ * 
+ * Responsibilities:
+ * - Check if asset has capability
+ * - Grant/revoke capabilities
+ * - Query permission state
+ * 
+ * Security notes:
+ * - Server-side enforcement only
+ * - UI cannot bypass checks
+ * - All actions logged to audit
+ */
+
+export interface Capability {
+  id: string;
+  scope: string; // e.g., 'ai.gemini.inference'
+  assetId: string;
+  enabled: boolean;
+  grantedAt: number;
+}
+
+export async function checkCapability(
+  assetId: string,
+  capability: string
+): Promise<boolean> {
+  // TODO: Implement capability check
+  throw new Error('Not implemented');
+}
+
+export async function grantCapability(
+  assetId: string,
+  capability: string
+): Promise<void> {
+  // TODO: Implement capability grant
+  // Must log to audit
+  throw new Error('Not implemented');
+}
+
+export async function revokeCapability(
+  assetId: string,
+  capability: string
+): Promise<void> {
+  // TODO: Implement capability revocation
+  // Must log to audit
+  throw new Error('Not implemented');
+}
+
+// ==================================
+// codex-vault/src/secrets/index.ts
+// ==================================
+/**
+ * Provider Secret Storage & Rotation
+ * 
+ * Responsibilities:
+ * - Store provider credentials encrypted
+ * - Inject secrets per-request
+ * - Rotate secrets safely
+ * - Never return raw secrets
+ * 
+ * Security notes:
+ * - NO SECRET EVER RETURNED BY API
+ * - Secrets injected ephemerally only
+ * - Rotation happens without client redeployment
+ */
+
+export interface Provider {
+  id: string;
+  name: string; // 'gemini', 'openai', etc.
+  status: 'healthy' | 'paused' | 'degraded';
+  lastRotation?: number;
+}
+
+export async function storeSecret(
+  providerId: string,
+  secret: string
+): Promise<void> {
+  // TODO: Implement encrypted storage
+  // Must never log secret value
+  throw new Error('Not implemented');
+}
+
+export async function injectSecret(
+  providerId: string,
+  assetId: string,
+  requestContext: unknown
+): Promise<string> {
+  // TODO: Implement ephemeral injection
+  // Validate capability first
+  // Log request to audit
+  throw new Error('Not implemented');
+}
+
+export async function rotateSecret(providerId: string): Promise<void> {
+  // TODO: Implement secret rotation
+  // Must log to audit
+  // Must not disrupt active requests
+  throw new Error('Not implemented');
+}
+
+// ==================================
+// codex-vault/src/ingest/index.ts
+// ==================================
+/**
+ * Vault Ingest Engine
+ * 
+ * Responsibilities:
+ * - Scan uploaded projects (read-only)
+ * - Detect provider usage
+ * - Resolve capabilities
+ * - Bind assets to Vault
+ * 
+ * Security notes:
+ * - Never execute uploaded code
+ * - Ignore .env files
+ * - No secret extraction from uploads
+ */
+
+export interface ScanResult {
+  providers: string[];
+  runtime: 'frontend' | 'backend' | 'hybrid';
+  requestedCapabilities: string[];
+  warnings: string[];
+}
+
+export async function scanProject(
+  projectPath: string
+): Promise<ScanResult> {
+  // TODO: Implement read-only scanning
+  // Detect AI provider usage patterns
+  // No code execution
+  throw new Error('Not implemented');
+}
+
+export async function bindAsset(
+  ingestId: string,
+  scanResult: ScanResult
+): Promise<string> {
+  // TODO: Implement asset binding
+  // Create asset record
+  // Register capabilities
+  // Return assetId
+  throw new Error('Not implemented');
+}
+
+// ==================================
+// codex-vault/src/registry/index.ts
+// ==================================
+/**
+ * Asset Registry
+ * 
+ * Responsibilities:
+ * - Store asset metadata
+ * - Track ownership
+ * - Query asset state
+ * 
+ * Security notes:
+ * - Owner field immutable after creation
+ * - Asset ID is system-generated
+ */
+
+export interface Asset {
+  id: string;
+  owner: string; // 'founder' in v1
+  name?: string;
+  status: 'managed' | 'paused' | 'locked';
+  capabilities: string[];
+  createdAt: number;
+  lastActivity?: number;
+}
+
+export async function registerAsset(
+  owner: string,
+  capabilities: string[]
+): Promise<Asset> {
+  // TODO: Implement asset registration
+  throw new Error('Not implemented');
+}
+
+export async function getAsset(assetId: string): Promise<Asset | null> {
+  // TODO: Implement asset retrieval
+  throw new Error('Not implemented');
+}
+
+export async function listAssets(owner?: string): Promise<Asset[]> {
+  // TODO: Implement asset listing
+  throw new Error('Not implemented');
+}
+
+// ==================================
+// codex-vault/src/runtime/index.ts
+// ==================================
+/**
+ * Runtime Control & Mediation
+ * 
+ * Responsibilities:
+ * - Start/pause/restart assets
+ * - Mediate provider requests
+ * - Enforce kill-switch
+ * 
+ * Security notes:
+ * - All state changes logged
+ * - Commands require founder role
+ * - No optimistic UI updates
+ */
+
+export async function startAsset(assetId: string): Promise<void> {
+  // TODO: Implement asset start
+  // Check permissions
+  // Log to audit
+  throw new Error('Not implemented');
+}
+
+export async function pauseAsset(assetId: string): Promise<void> {
+  // TODO: Implement asset pause
+  // Check permissions
+  // Log to audit
+  throw new Error('Not implemented');
+}
+
+export async function mediateRequest(
+  assetId: string,
+  providerId: string,
+  request: unknown
+): Promise<unknown> {
+  // TODO: Implement request mediation
+  // Check capability
+  // Inject secret
+  // Forward to provider
+  // Log to audit
+  throw new Error('Not implemented');
+}
+
+// ==================================
+// codex-vault/src/audit/index.ts
+// ==================================
+/**
+ * Immutable Audit Logging
+ * 
+ * Responsibilities:
+ * - Record all privileged actions
+ * - Provide audit streams
+ * - Enable compliance queries
+ * 
+ * Security notes:
+ * - Append-only (no deletion)
+ * - Tamper-evident
+ * - Never log secrets
+ */
+
+export interface AuditEvent {
+  id: string;
+  timestamp: number;
+  actor: string;
+  action: string;
+  assetId?: string;
+  providerId?: string;
+  result: 'approved' | 'denied' | 'error';
+  metadata?: Record<string, unknown>;
+}
+
+export async function logEvent(
+  actor: string,
+  action: string,
+  result: 'approved' | 'denied' | 'error',
+  metadata?: Record<string, unknown>
+): Promise<void> {
+  // TODO: Implement immutable logging
+  // Never log secret values
+  throw new Error('Not implemented');
+}
+
+export async function streamEvents(
+  assetId?: string
+): Promise<AsyncIterable<AuditEvent>> {
+  // TODO: Implement event streaming
+  throw new Error('Not implemented');
+}
+
+export async function queryEvents(
+  filters: Partial<AuditEvent>
+): Promise<AuditEvent[]> {
+  // TODO: Implement audit queries
+  throw new Error('Not implemented');
+}
+
+// ==================================
+// codex-vault/src/api/routes.ts
+// ==================================
+/**
+ * HTTP API Routes
+ * 
+ * Responsibilities:
+ * - Define API endpoints
+ * - Validate requests
+ * - Format responses
+ * 
+ * Security notes:
+ * - All routes require authentication
+ * - All routes enforce authorization
+ * - All routes log to audit
+ * - NO ROUTE RETURNS SECRETS
+ */
+
+export function setupRoutes(app: unknown): void {
+  // TODO: Implement API routes per API_REFERENCE.md
+  // Routes:
+  // - GET  /vault/session
+  // - POST /vault/ingest/upload
+  // - GET  /vault/ingest/:id/scan
+  // - POST /vault/ingest/:id/bind
+  // - GET  /vault/assets
+  // - GET  /vault/assets/:id
+  // - POST /vault/assets/:id/runtime/start
+  // - POST /vault/assets/:id/runtime/pause
+  // - POST /vault/assets/:id/runtime/restart
+  // - GET  /vault/assets/:id/permissions
+  // - POST /vault/assets/:id/permissions
+  // - GET  /vault/assets/:id/logs/stream
+  // - GET  /vault/providers
+  // - POST /vault/providers/:id/rotate
+  // - POST /vault/providers/:id/pause
+  // - GET  /vault/activity
+  // - POST /vault/system/lock
+  // - POST /vault/system/unlock
+  // - POST /vault/system/emergency-shutdown
+  
+  throw new Error('Not implemented');
+}

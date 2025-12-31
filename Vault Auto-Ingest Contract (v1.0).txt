@@ -1,0 +1,230 @@
+🧾 VAULT AUTO-INGEST CONTRACT (v1.0)
+Purpose
+
+To allow any Gemini-built (and later non-Gemini) app to be:
+
+Uploaded as a folder
+
+Automatically scanned
+
+Automatically wired into Codex
+
+Automatically secured by the Vault
+without modifying app logic or rebuilding
+
+1️⃣ Ingest Entry Point
+Input
+/uploaded-project/
+  ├─ src/
+  ├─ app/
+  ├─ server/
+  ├─ public/
+  ├─ package.json (optional)
+  ├─ .env (optional / ignored)
+
+Rules
+
+Folder upload only (zip or directory)
+
+No secrets required
+
+.env files are ignored (never trusted)
+
+Build artifacts are ignored (dist, .next, build)
+
+2️⃣ Vault Scan Phase (Read-Only)
+
+The Vault performs a non-destructive scan.
+
+It detects:
+🔍 AI Providers
+
+Pattern-based + heuristic:
+
+Gemini
+
+OpenAI
+
+Anthropic
+
+ElevenLabs
+
+Stability / image models
+
+🔍 Access Patterns
+
+process.env.*
+
+hardcoded apiKey, key, token
+
+SDK initializations
+
+fetch / axios calls to known AI endpoints
+
+🔍 Runtime Type
+
+frontend-only
+
+backend-only
+
+hybrid
+
+edge / serverless
+
+No code is executed.
+No files are altered yet.
+
+3️⃣ Secret Abstraction Rule (Critical)
+Absolute Law
+
+No app may access a raw API key directly
+
+Vault Action
+
+All detected secret usage is abstracted, not replaced.
+
+Example abstraction:
+// original intent (never exposed)
+AIProvider.init({ apiKey: ENV });
+
+// vault abstraction
+Vault.request('ai.gemini', {
+  appId,
+  scope: 'inference'
+})
+
+Important
+
+App logic stays the same
+
+Vault injects runtime bindings
+
+Keys never touch app memory directly
+
+4️⃣ Auto-Generated Shell Structure
+
+Vault generates (outside the app):
+
+/vault-bindings/
+  ├─ bindings.map.json
+  ├─ runtime-shims/
+  └─ provider-handlers/
+
+/shell/
+  ├─ start.mjs
+  ├─ health.mjs
+  └─ permissions.mjs
+
+Meaning
+
+App = unchanged asset
+
+Shell = execution harness
+
+Vault = authority
+
+The app becomes a managed node, not a standalone system.
+
+5️⃣ Permissions Injection (Founder-Only by Default)
+
+Each ingested app is registered with:
+
+{
+  "appId": "auto-generated",
+  "owner": "founder",
+  "allowedActions": [
+    "ai.inference",
+    "read.runtime",
+    "emit.logs"
+  ],
+  "secrets": [
+    "ai.gemini"
+  ]
+}
+
+
+Defaults:
+
+❌ No env injection unless approved
+
+❌ No cross-app access
+
+❌ No outbound secrets
+
+Everything must pass Vault permission checks.
+
+6️⃣ Runtime Binding Phase (No Build Step)
+
+At runtime:
+
+Vault injects bindings via:
+
+process hooks
+
+request interceptors
+
+provider shims
+
+App thinks it has access
+
+Vault controls the flow
+
+This works because Gemini-built apps are convention-driven.
+
+7️⃣ Observability (Automatic)
+
+Vault automatically enables:
+
+App health ping
+
+AI usage metrics
+
+Error + log streaming
+
+Provider usage tracking
+
+Assets Manager can:
+
+View usage
+
+Pause app
+
+Revoke access
+
+Rotate keys instantly
+
+No redeploy needed.
+
+🧠 Architectural Snapshot
+4
+8️⃣ Contract Guarantees
+
+This contract guarantees:
+
+✅ Zero secret leakage
+
+✅ No app rebuilds
+
+✅ No manual wiring
+
+✅ Infinite app onboarding
+
+✅ Founder-only authority
+
+✅ Future SaaS readiness
+
+Breaking this contract is not allowed anywhere in Codex.
+
+🔒 What this enables next (naturally)
+
+Now that the contract is defined, the next irreversible step is:
+
+👉 Vault Ingest Engine
+
+A service that:
+
+Accepts uploads
+
+Runs this contract
+
+Registers assets automatically

@@ -1,0 +1,90 @@
+🧠 CODEX BUILDER MISSION
+
+Title: Assets Manager Control Plane v1
+
+🎯 Objective
+
+Create a Founder-only Assets Manager frontend that operates entirely through the Vault, implementing the Vault Ingest Engine UI, with zero secret exposure and zero local authority.
+
+🧱 Constraints (Non-Negotiable)
+
+React + Tailwind (production, no CDN)
+
+No secrets in frontend
+
+No provider SDKs
+
+No optimistic state
+
+All authority via Vault APIs
+
+ES modules (.mjs where applicable)
+
+PowerShell-safe, ASCII only
+
+🧩 Deliverables
+
+Scaffold component skeletons exactly as specified
+
+Wire routing + layout (AppShell, Sidebar, TopBar)
+
+Implement VaultGuard auth gate
+
+Implement API client (vaultClient)
+
+All buttons disabled unless Vault confirms
+
+Logs streamed read-only
+
+Dark, calm, technical UI
+
+🧠 Success Criteria
+
+Upload Gemini app folder → scan → bind → asset appears
+
+Asset can be started/stopped only via Vault
+
+Permissions toggle capabilities, not keys
+
+No secret visible anywhere
+
+UI reflects Vault truth at all times
+
+🛑 Explicit Exclusions
+
+No backend logic
+
+No secret handling
+
+No SDK integration
+
+No mock authority
+
+✅ Where you are now (important)
+
+You now have:
+
+A Vault-first authority model
+
+A zero-build ingestion engine
+
+A Founder-only control plane
+
+A component-mapped UI
+
+A clean mission for autonomous execution
+
+This is no longer an “app project”.
+It’s a platform nervous system.
+
+When Codex Builder completes this mission
+
+The next natural phase will be:
+
+🔁 Live log streaming polish
+
+🧠 Usage analytics per asset
+
+🧩 Optional user tiers (later, safely)
+
+When you’re ready, just say:

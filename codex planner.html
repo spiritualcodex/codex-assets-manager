@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imagine Planner Nexus</title>
+    <!-- React, ReactDOM, Babel -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Custom scrollbars */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #1e293b;
+        border-radius: 10px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #334155;
+      }
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+      /* Pulsing animation used in logs */
+      @keyframes pulse2s {
+        0% { opacity: 0.3; }
+        50% { opacity: 1; }
+        100% { opacity: 0.3; }
+      }
+      .animate-pulse-2s {
+        animation: pulse2s 2s infinite;
+      }
+    </style>
+</head>
+<body class="bg-[#050505] text-slate-200 font-sans selection:bg-cyan-500/30 overflow-hidden">
+    <div id="root"></div>
+    <script type="text/babel">
+      const { useState, useEffect, useMemo } = React;
+
+      // Define placeholder icons using emojis to avoid external dependencies
+      const Icons = {
+        Shield: (props) => <span {...props}>🛡️</span>,
+        Zap: (props) => <span {...props}>⚡</span>,
+        Radio: (props) => <span {...props}>📻</span>,
+        Terminal: (props) => <span {...props}>💻</span>,
+        Settings: (props) => <span {...props}>⚙️</span>,
+        Cpu: (props) => <span {...props}>🧠</span>,
+        Globe: (props) => <span {...props}>🌐</span>,
+        Cloud: (props) => <span {...props}>☁️</span>,
+        Layout: (props) => <span {...props}>📄</span>,
+        Send: (props) => <span {...props}>➤</span>,
+        Layers: (props) => <span {...props}>🗂️</span>,
+        Database: (props) => <span {...props}>🗃️</span>,
+        Activity: (props) => <span {...props}>⚙️</span>,
+        Eye: (props) => <span {...props}>👁️</span>,
+        Box: (props) => <span {...props}>📦</span>,
+        MessageSquare: (props) => <span {...props}>💬</span>,
+        Play: (props) => <span {...props}>▶️</span>,
+        RefreshCw: (props) => <span {...props}>🔄</span>,
+        Lock: (props) => <span {...props}>🔒</span>
+      };
+
+      function App() {
+        const [activeTab, setActiveTab] = useState('planner');
+        const [isDeploying, setIsDeploying] = useState(false);
+        const [deployStep, setDeployStep] = useState(0);
+        const [logs, setLogs] = useState([{ msg: "Nexus System Initialized...", type: "system", time: new Date().toLocaleTimeString() }]);
+
+        // Agent registry
+        const builderAgents = [
+          { name: "Oracle", role: "Core Logic / Truth Generator", icon: <Icons.Eye size={16}/> },
+          { name: "Sanctum", role: "Security & Secret Vault", icon: <Icons.Lock size={16}/> },
+          { name: "Quantum Echo", role: "Adaptive Feedback Loop", icon: <Icons.RefreshCw size={16}/> },
+          { name: "Jules", role: "Chief Architect / Builder", icon: <Icons.Cpu size={16}/> },
+          { name: "Sentinel", role: "Watchdog / Uptime Guard", icon: <Icons.Shield size={16}/> },
+          { name: "Cipher", role: "Encryption / Protocol Dev", icon: <Icons.Terminal size={16}/> },
+        ];
+        const contentAgents = [
+          { name: "Flux", role: "Media Pipeline (WP/YouTube)", icon: <Icons.Radio size={16}/> },
+          { name: "Val", role: "Creative Lead (Blog/Quora)", icon: <Icons.MessageSquare size={16}/> },
+          { name: "Aura", role: "Visual Presence (Pinterest/IG)", icon: <Icons.Layout size={16}/> },
+          { name: "Market-Link", role: "E-commerce (Amazon/Stripe)", icon: <Icons.Database size={16}/> },
+        ];
+        const phases = Array.from({ length: 27 }, (_, i) => `Phase ${i + 1}`);
+
+        const addLog = (msg, type = "info") => {
+          setLogs(prev => [{ msg, type, time: new Date().toLocaleTimeString() }, ...prev.slice(0, 50)]);
+        };
+
+        const handleDeployment = () => {
+          if (isDeploying) return;
+          setIsDeploying(true);
+          setDeployStep(1);
+          addLog("Executive Handshake Initiated...", "warning");
+          const sequence = [
+            { msg: "Interrogating Decider Manifest...", t: 1500 },
+            { msg: "Compiling Builder Logic (Oracle/Sanctum)...", t: 3000 },
+            { msg: "Syncing Content Agents (Flux/Val)...", t: 4500 },
+            { msg: "Pushing to GitHub & Render...", t: 6000 },
+            { msg: "Codex Live: Harmony Established.", t: 8000, final: true }
+          ];
+          sequence.forEach((step, i) => {
+            setTimeout(() => {
+              setDeployStep(i + 2);
+              addLog(step.msg, step.final ? "success" : "info");
+              if (step.final) setIsDeploying(false);
+            }, step.t);
+          });
+        };
+
+        return (
+          <div className="min-h-screen">
+            {/* Top Header */}
+            <header className="border-b border-white/5 bg-black/40 backdrop-blur-md p-4 flex justify-between items-center sticky top-0 z-50">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.5)]">
+                  <Icons.Layers className="text-black" />
+                </div>
+                <div>
+                  <h1 className="text-sm font-bold tracking-tighter uppercase">Imagine Planner <span className="text-cyan-400">Nexus</span></h1>
+                  <p className="text-[10px] text-slate-500 font-mono tracking-widest">JOINT VENTURE // BRIDGE_V4</p>
+                </div>
+              </div>
+              <nav className="flex gap-1 bg-white/5 p-1 rounded-lg border border-white/10">
+                {['planner', 'decider', 'uplinks', 'terminal'].map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setActiveTab(t)}
+                    className={`px-4 py-1.5 rounded-md text-[11px] font-bold uppercase transition-all ${activeTab === t ? 'bg-cyan-500 text-black' : 'text-slate-400 hover:text-white'}`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </nav>
+              <div className="flex items-center gap-4">
+                <div className="flex flex-col items-end">
+                  <span className="text-[10px] text-green-500 font-bold flex items-center gap-1 uppercase">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"/> Manager Office Online
+                  </span>
+                </div>
+              </div>
+            </header>
+            <main className="p-6 max-w-7xl mx-auto">
+              {activeTab === 'planner' && (
+                <div className="grid grid-cols-12 gap-6">
+                  <div className="col-span-3 space-y-6">
+                    {/* Builder Registry */}
+                    <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                      <h3 className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest mb-4">Builder Registry</h3>
+                      <div className="space-y-3">
+                        {builderAgents.map(agent => (
+                          <div key={agent.name} className="flex items-center gap-3 group cursor-pointer">
+                            <div className="p-2 rounded bg-black border border-white/5 text-cyan-500 group-hover:border-cyan-500/50 transition-all">
+                              {agent.icon}
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold">{agent.name}</p>
+                              <p className="text-[9px] text-slate-500 uppercase tracking-tighter">{agent.role}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    {/* Content Registry */}
+                    <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                      <h3 className="text-[10px] font-bold text-purple-400 uppercase tracking-widest mb-4">Content Registry</h3>
+                      <div className="space-y-3">
+                        {contentAgents.map(agent => (
+                          <div key={agent.name} className="flex items-center gap-3 group cursor-pointer">
+                            <div className="p-2 rounded bg-black border border-white/5 text-purple-500 group-hover:border-purple-500/50 transition-all">
+                              {agent.icon}
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold">{agent.name}</p>
+                              <p className="text-[9px] text-slate-500 uppercase tracking-tighter">{agent.role}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  {/* Main Canvas: Phase Planner */}
+                  <div className="col-span-9 bg-white/5 border border-white/10 rounded-xl p-8 min-h-[600px] relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 via-purple-500 to-blue-500 opacity-50"></div>
+                    <div className="flex justify-between items-start mb-8">
+                      <div>
+                        <h2 className="text-2xl font-bold tracking-tight">Strategy Canvas</h2>
+                        <p className="text-sm text-slate-400">Phase mapping & logic synchronization</p>
+                      </div>
+                      <button
+                        onClick={handleDeployment}
+                        disabled={isDeploying}
+                        className="flex items-center gap-2 bg-cyan-500 text-black px-6 py-2.5 rounded-full font-black uppercase text-xs hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] disabled:opacity-50"
+                      >
+                        <Icons.Play className="w-4 h-4" /> Initiate Handshake
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4">
+                      {phases.slice(20, 27).map((p, i) => (
+                        <div key={p} className="p-4 rounded-lg bg-black/40 border border-white/10 hover:border-cyan-500/30 transition-all group relative">
+                          <div className="flex justify-between items-start mb-2">
+                            <span className="text-[10px] font-mono text-cyan-400">{p}</span>
+                            <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
+                          </div>
+                          <h4 className="text-sm font-bold mb-1">Architecture Sync</h4>
+                          <p className="text-[10px] text-slate-500 leading-relaxed italic">Linking Oracle and Sanctum for automated self-healing loops.</p>
+                          <div className="mt-4 pt-4 border-t border-white/5 flex gap-2">
+                            <div className="w-6 h-6 rounded-full bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-[10px] font-bold">O</div>
+                            <div className="w-6 h-6 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-[10px] font-bold">F</div>
+                          </div>
+                        </div>
+                      ))}
+                      <div className="p-4 rounded-lg border-2 border-dashed border-white/5 flex items-center justify-center text-slate-600 hover:text-cyan-500 cursor-pointer transition-all">
+                        <span className="text-xs font-bold uppercase tracking-widest">+ New Phase</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {activeTab === 'decider' && (
+                <div className="space-y-6 animate-in fade-in duration-500">
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-8">
+                    <h2 className="text-2xl font-bold mb-6 text-center tracking-tight">Executive Progress Reel</h2>
+                    <div className="grid grid-cols-6 gap-4 relative">
+                      <div className="absolute top-1/2 left-0 w-full h-0.5 bg-white/5 -z-10"></div>
+                      {[
+                        { label: "Content Draft", icon: <Icons.Layout />, status: deployStep > 1 ? "Complete" : "Queued" },
+                        { label: "Quora Sync", icon: <Icons.MessageSquare />, status: deployStep > 2 ? "Complete" : "Queued" },
+                        { label: "WP Deployment", icon: <Icons.Globe />, status: deployStep > 3 ? "Complete" : "Queued" },
+                        { label: "YouTube Export", icon: <Icons.Radio />, status: deployStep > 4 ? "Complete" : "Queued" },
+                        { label: "Pinterest Pin", icon: <Icons.Eye />, status: deployStep > 5 ? "Complete" : "Queued" },
+                        { label: "Amazon Store", icon: <Icons.Database />, status: deployStep > 6 ? "Complete" : "Queued" }
+                      ].map((item, idx) => (
+                        <div key={idx} className="flex flex-col items-center gap-3">
+                          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border-2 transition-all duration-700 ${
+                            deployStep > idx + 1 ? 'bg-cyan-500 border-cyan-400 text-black shadow-[0_0_25px_rgba(6,182,212,0.4)]' : 'bg-black border-white/10 text-slate-500'
+                          }`}> {item.icon} </div>
+                          <p className="text-[10px] font-black uppercase text-center">{item.label}</p>
+                          <span className={`text-[8px] font-mono ${deployStep > idx + 1 ? 'text-cyan-400' : 'text-slate-600'}`}>{item.status}</span>
+                        </div>
+                      ))}
+                    </div>
+                    {isDeploying && (
+                      <div className="mt-12 max-w-md mx-auto">
+                        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                          <div className="h-full bg-cyan-500 transition-all duration-1000" style={{ width: `${(deployStep / 7) * 100}%` }}></div>
+                        </div>
+                        <p className="text-center mt-4 text-xs font-mono text-cyan-400 animate-pulse uppercase tracking-tighter">Manager Office is constructing payload...</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              {activeTab === 'uplinks' && (
+                <div className="grid grid-cols-4 gap-6">
+                  {['GitHub', 'Render', 'Supabase', 'Stripe', 'Zapier', 'Make', 'WP-API', 'Gemini'].map(api => (
+                    <div key={api} className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-cyan-500/50 transition-all">
+                      <div className="flex justify-between items-center mb-4">
+                        <div className="w-8 h-8 rounded bg-white/5 flex items-center justify-center">
+                          <Icons.Zap className="w-4 h-4 text-yellow-500" />
+                        </div>
+                        <span className="text-[8px] font-mono text-slate-500">CONNECTED</span>
+                      </div>
+                      <h4 className="text-sm font-bold mb-2">{api} Uplink</h4>
+                      <div className="h-8 bg-black/40 rounded border border-white/5 flex items-center px-2">
+                        <div className="flex gap-1">
+                          {Array.from({ length: 6 }, (_, i) => <div key={i} className="w-1.5 h-1.5 rounded-full bg-slate-700"></div>)}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {activeTab === 'terminal' && (
+                <div className="bg-black rounded-xl border border-white/10 overflow-hidden font-mono">
+                  <div className="bg-white/5 px-4 py-2 border-b border-white/10 flex justify-between items-center">
+                    <span className="text-xs text-slate-400 uppercase tracking-widest">Nexus System Logs</span>
+                    <div className="flex gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full bg-red-500/50"></div>
+                      <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/50"></div>
+                      <div className="w-2.5 h-2.5 rounded-full bg-green-500/50"></div>
+                    </div>
+                  </div>
+                  <div className="p-4 h-[500px] overflow-y-auto space-y-1">
+                    {logs.map((log, i) => (
+                      <div key={i} className="text-[12px] flex gap-4">
+                        <span className="text-slate-600 shrink-0">[{log.time}]</span>
+                        <span className={
+                          log.type === 'success' ? 'text-cyan-400' :
+                          log.type === 'warning' ? 'text-yellow-400' :
+                          log.type === 'system' ? 'text-purple-400' : 'text-slate-300'
+                        }>
+                          {log.msg}
+                        </span>
+                      </div>
+                    ))}
+                    <div className="flex gap-2 items-center text-cyan-400">
+                      <span className="animate-pulse">_</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </main>
+            {/* Floating Status Bar */}
+            <footer className="fixed bottom-6 right-6 flex gap-4 pointer-events-none">
+              <div className="bg-black/80 backdrop-blur border border-white/10 px-4 py-2 rounded-full flex items-center gap-3 shadow-2xl pointer-events-auto">
+                <Icons.Activity className="w-4 h-4 text-green-500" />
+                <span className="text-[10px] font-bold uppercase tracking-tighter">Heartbeat: <span className="text-cyan-400">Stable</span></span>
+                <div className="h-3 w-[1px] bg-white/10 mx-2"></div>
+                <span className="text-[10px] font-bold uppercase tracking-tighter text-slate-500">Cycles: 482,921</span>
+              </div>
+            </footer>
+          </div>
+        );
+      }
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
+    </script>
+</body>
+</html>

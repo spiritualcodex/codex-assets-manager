@@ -1,0 +1,256 @@
+1️⃣ Component Skeletons (React + Tailwind)
+
+Structural only — no business logic, no secrets, no authority
+
+These are the canonical components Codex Builder will scaffold, not handwritten UI.
+
+📁 Frontend Structure (Assets Manager)
+assets-manager/
+├─ src/
+│  ├─ app/
+│  │  ├─ AppShell.tsx
+│  │  ├─ routes.tsx
+│  │  └─ VaultGuard.tsx
+│  │
+│  ├─ layout/
+│  │  ├─ TopBar.tsx
+│  │  ├─ Sidebar.tsx
+│  │  └─ MainPanel.tsx
+│  │
+│  ├─ ingest/
+│  │  ├─ IngestView.tsx
+│  │  ├─ UploadZone.tsx
+│  │  ├─ ScanResults.tsx
+│  │  └─ BindAction.tsx
+│  │
+│  ├─ assets/
+│  │  ├─ AssetsList.tsx
+│  │  ├─ AssetCard.tsx
+│  │  └─ AssetDetail.tsx
+│  │
+│  ├─ asset-tabs/
+│  │  ├─ OverviewTab.tsx
+│  │  ├─ PermissionsTab.tsx
+│  │  ├─ RuntimeTab.tsx
+│  │  ├─ LogsTab.tsx
+│  │  └─ HealthTab.tsx
+│  │
+│  ├─ vault/
+│  │  ├─ VaultView.tsx
+│  │  └─ ProviderCard.tsx
+│  │
+│  ├─ activity/
+│  │  ├─ ActivityLog.tsx
+│  │  └─ ActivityItem.tsx
+│  │
+│  ├─ system/
+│  │  ├─ SystemControls.tsx
+│  │  └─ DangerAction.tsx
+│  │
+│  └─ api/
+│     └─ vaultClient.ts
+
+🔒 Rules baked into skeletons
+
+No secrets
+
+No provider SDKs
+
+No optimistic UI
+
+No local authority
+
+Everything async → Vault
+
+These are view-only shells.
+
+2️⃣ Assets Manager API Endpoints
+
+Vault-centric, zero-trust, append-only where possible
+
+This is the only API surface the UI talks to.
+
+🔐 AUTH / SESSION
+GET  /vault/session
+→ { identity, role, vaultStatus }
+
+
+Used by:
+
+<VaultGuard />
+
+<TopBar />
+
+📦 INGEST
+POST /vault/ingest/upload
+→ { ingestId }
+
+GET  /vault/ingest/:ingestId/scan
+→ {
+  providers,
+  runtime,
+  requestedCapabilities,
+  warnings
+}
+
+POST /vault/ingest/:ingestId/bind
+→ { assetId }
+
+
+UI never uploads secrets.
+Vault ignores .env.
+
+🧬 ASSETS
+GET /vault/assets
+→ AssetSummary[]
+
+GET /vault/assets/:assetId
+→ AssetDetail
+
+POST /vault/assets/:assetId/runtime/start
+POST /vault/assets/:assetId/runtime/pause
+POST /vault/assets/:assetId/runtime/restart
+
+
+Runtime actions are commands, not state setters.
+
+🔑 PERMISSIONS (Capabilities, not keys)
+GET  /vault/assets/:assetId/permissions
+
+POST /vault/assets/:assetId/permissions
+body: { capability, enabled }
+
+
+Vault validates role = founder.
+
+📡 LOGS (STREAM ONLY)
+GET /vault/assets/:assetId/logs/stream
+(SSE or WebSocket)
+
+
+Append-only
+
+No deletion
+
+No filtering at source
+
+🧠 VAULT PROVIDERS
+GET /vault/providers
+
+POST /vault/providers/:provider/rotate
+POST /vault/providers/:provider/pause
+
+
+No endpoint ever returns a secret.
+
+🧾 ACTIVITY (IMMUTABLE)
+GET /vault/activity
+
+
+Chronological truth log.
+This becomes your audit spine.
+
+🚨 SYSTEM (Founder-Only / Dangerous)
+POST /vault/system/lock
+POST /vault/system/unlock
+POST /vault/system/emergency-shutdown
+
+
+Each requires:
+
+Founder role
+
+Explicit confirmation token
+
+3️⃣ Mission Brief for Codex Builder
+
+This is what you hand off verbatim
+
+🧠 CODEX BUILDER MISSION
+
+Title: Assets Manager Control Plane v1
+
+🎯 Objective
+
+Create a Founder-only Assets Manager frontend that operates entirely through the Vault, implementing the Vault Ingest Engine UI, with zero secret exposure and zero local authority.
+
+🧱 Constraints (Non-Negotiable)
+
+React + Tailwind (production, no CDN)
+
+No secrets in frontend
+
+No provider SDKs
+
+No optimistic state
+
+All authority via Vault APIs
+
+ES modules (.mjs where applicable)
+
+PowerShell-safe, ASCII only
+
+🧩 Deliverables
+
+Scaffold component skeletons exactly as specified
+
+Wire routing + layout (AppShell, Sidebar, TopBar)
+
+Implement VaultGuard auth gate
+
+Implement API client (vaultClient)
+
+All buttons disabled unless Vault confirms
+
+Logs streamed read-only
+
+Dark, calm, technical UI
+
+🧠 Success Criteria
+
+Upload Gemini app folder → scan → bind → asset appears
+
+Asset can be started/stopped only via Vault
+
+Permissions toggle capabilities, not keys
+
+No secret visible anywhere
+
+UI reflects Vault truth at all times
+
+🛑 Explicit Exclusions
+
+No backend logic
+
+No secret handling
+
+No SDK integration
+
+No mock authority
+
+✅ Where you are now (important)
+
+You now have:
+
+A Vault-first authority model
+
+A zero-build ingestion engine
+
+A Founder-only control plane
+
+A component-mapped UI
+
+A clean mission for autonomous execution
+
+This is no longer an “app project”.
+It’s a platform nervous system.
+
+When Codex Builder completes this mission
+
+The next natural phase will be:
+
+🔁 Live log streaming polish
+
+🧠 Usage analytics per asset
+
+🧩 Optional user tiers (later, safely)

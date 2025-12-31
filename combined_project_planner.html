@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unified Project Planner</title>
+    <!-- React and Babel for JSX support -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- D3 for network visualisation -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- Tailwind CSS for rapid styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Global HUD look */
+        body {
+            margin: 0;
+            height: 100vh;
+            background-color: #020617;
+            color: #e2e8f0;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+        }
+        /* Scrollbars tuned for HUD */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #60a5fa;
+        }
+        /* Background grid */
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(30, 41, 59, 0.5) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(30, 41, 59, 0.5) 1px, transparent 1px);
+        }
+        /* Animated scanline overlay */
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        .scanline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.1), transparent);
+            pointer-events: none;
+            animation: scanline 4s linear infinite;
+            z-index: 50;
+        }
+        /* Minimal gauge styling */
+        .gauge-bar {
+            background-image: linear-gradient(90deg, #00c6ff, #0072ff);
+            box-shadow: 0 0 6px rgba(0, 150, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+    <script type="text/babel">
+    // Inline SVG icons for self‑containment
+    const IconBase = ({ children, size = 24, className = "" }) => (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={size}
+            height={size}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={className}
+        >
+            {children}
+        </svg>
+    );
+    const Icons = {
+        Brain: (props) => (
+            <IconBase {...props}>
+                <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z" />
+                <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z" />
+            </IconBase>
+        ),
+        Shield: (props) => (
+            <IconBase {...props}>
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+            </IconBase>
+        ),
+        Cpu: (props) => (
+            <IconBase {...props}>
+                <rect x="4" y="4" width="16" height="16" rx="2" />
+                <rect x="9" y="9" width="6" height="6" />
+                <path d="M15 2v2" /><path d="M15 20v2" /><path d="M2 15h2" /><path d="M2 9h2" /><path d="M20 15h2" /><path d="M20 9h2" /><path d="M9 2v2" /><path d="M9 20v2" />
+            </IconBase>
+        ),
+        Layers: (props) => (
+            <IconBase {...props}>
+                <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
+                <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
+                <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
+            </IconBase>
+        ),
+        Database: (props) => (
+            <IconBase {...props}>
+                <ellipse cx="12" cy="5" rx="9" ry="3" />
+                <path d="M3 5V19A9 3 0 0 0 21 19V5" />
+                <path d="M3 12A9 3 0 0 0 21 12" />
+            </IconBase>
+        ),
+        Layers3: (props) => (
+            <IconBase {...props}>
+                <path d="M19.5 9.5 12 4l-7.5 5.5" />
+                <path d="m19.5 14.5-7.5 5-7.5-5" />
+                <path d="m19.5 19.5-7.5 5-7.5-5" />
+            </IconBase>
+        ),
+        Zap: (props) => (
+            <IconBase {...props}>
+                <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z" />
+            </IconBase>
+        ),
+        RefreshCw: (props) => (
+            <IconBase {...props}>
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                <path d="M21 3v5h-5" />
+                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                <path d="M8 16H3v5" />
+            </IconBase>
+        ),
+        CheckCircle2: (props) => (
+            <IconBase {...props}>
+                <circle cx="12" cy="12" r="10" />
+                <path d="m9 12 2 2 4-4" />
+            </IconBase>
+        ),
+        Circle: (props) => (
+            <IconBase {...props}>
+                <circle cx="12" cy="12" r="10" />
+            </IconBase>
+        ),
+        ChevronLeft: (props) => (
+            <IconBase {...props}>
+                <path d="m15 18-6-6 6-6" />
+            </IconBase>
+        ),
+        Activity: (props) => (
+            <IconBase {...props}>
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+            </IconBase>
+        ),
+        Map: (props) => (
+            <IconBase {...props}>
+                <path d="M9 2 3 5l6 3 6-3 6 3-6 3-6-3v13l6 3 6-3V5l-6-3" />
+            </IconBase>
+        )
+    };
+
+    // Initial project data: derived from the GEMINI template (simplified)
+    const INITIAL_DATA = {
+        id: 'root',
+        title: 'AUTOPILOT OS',
+        description: 'Central Command Structure',
+        children: [
+            {
+                id: 'brain',
+                title: 'Brain / Autopilot OS',
+                icon: 'Brain',
+                children: [
+                    { id: 'b1', title: 'codex_autopilot.js', status: 'done' },
+                    { id: 'b2', title: 'autopilot-daemon.mjs', status: 'done' },
+                    { id: 'b3', title: 'AutopilotHeartbeat.js', status: 'pending' },
+                    { id: 'b4', title: 'jules‑orchestrator.js', status: 'pending' },
+                    { id: 'b5', title: 'autopilot‑relay‑bridge.mjs', status: 'pending' }
+                ]
+            },
+            {
+                id: 'immune',
+                title: 'Immune & Dispatch',
+                icon: 'Shield',
+                children: [
+                    { id: 'i1', title: 'guardianAgent.mjs', status: 'done' },
+                    { id: 'i2', title: 'flowkeeper-agent.mjs', status: 'pending' },
+                    { id: 'i3', title: 'navigator-agent.mjs', status: 'done' },
+                    { id: 'i4', title: 'builder-agent.mjs', status: 'pending' },
+                    { id: 'i5', title: 'agent-handshake.mjs', status: 'done' }
+                ]
+            },
+            {
+                id: 'workers',
+                title: 'Worker & Domain Agents',
+                icon: 'Cpu',
+                children: [
+                    {
+                        id: 'w_content',
+                        title: 'Content/Media',
+                        children: [
+                            { id: 'wc1', title: 'contentWriterAgent', status: 'pending' },
+                            { id: 'wc2', title: 'summaryAgent', status: 'done' },
+                            { id: 'wc3', title: 'shortformAgent', status: 'pending' },
+                            { id: 'wc4', title: 'outputAgent', status: 'done' }
+                        ]
+                    },
+                    {
+                        id: 'w_meta',
+                        title: 'SEO/Metadata',
+                        children: [
+                            { id: 'wm1', title: 'seoAgent', status: 'done' },
+                            { id: 'wm2', title: 'metadataAgent', status: 'pending' },
+                            { id: 'wm3', title: 'jsonPackagerAgent', status: 'done' }
+                        ]
+                    },
+                    {
+                        id: 'w_spirit',
+                        title: 'Spiritual/Soul',
+                        children: [
+                            { id: 'ws1', title: 'numerologyAgent', status: 'pending' },
+                            { id: 'ws2', title: 'astrologyAgent', status: 'pending' },
+                            { id: 'ws3', title: 'pastlifeAgent', status: 'pending' },
+                            { id: 'ws4', title: 'shadowworkAgent', status: 'pending' },
+                            { id: 'ws5', title: 'SoulDecoderAgent', status: 'pending' }
+                        ]
+                    },
+                    {
+                        id: 'w_media',
+                        title: 'Media Automation',
+                        children: [
+                            { id: 'wma1', title: 'youtubeAgent', status: 'pending' },
+                            { id: 'wma2', title: 'tiktokAgent', status: 'pending' },
+                            { id: 'wma3', title: 'pictoryAgent', status: 'pending' }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'frontend',
+                title: 'Frontend Interface',
+                icon: 'Layers',
+                children: [
+                    { id: 'f1', title: 'Glide UI & Data Tables', status: 'done' },
+                    { id: 'f2', title: 'React/Vite Scaffolding', status: 'done' },
+                    { id: 'f3', title: 'Self-healing Watchdog', status: 'pending' }
+                ]
+            },
+            {
+                id: 'backlog',
+                title: 'Development Queue',
+                icon: 'Database',
+                children: [
+                    {
+                        id: 'inprogress',
+                        title: 'In Progress',
+                        children: [
+                            { id: 'ip1', title: 'Spiritual engine Phase 8', status: 'pending' },
+                            { id: 'ip2', title: 'Backend endpoints', status: 'done' },
+                            { id: 'ip3', title: 'Dynamic binding', status: 'pending' }
+                        ]
+                    },
+                    {
+                        id: 'missing',
+                        title: 'Missing / Roadmap',
+                        children: [
+                            { id: 'm1', title: 'Video Storage (S3/Mux)', status: 'pending' },
+                            { id: 'm2', title: 'Marketplace Integration', status: 'pending' },
+                            { id: 'm3', title: 'Crown the Brain', status: 'pending' }
+                        ]
+                    }
+                ]
+            }
+        ]
+    };
+
+    // Convert the project data into a tree structure for D3. Leaf nodes have a refId for toggle operations.
+    function buildTreeFromProject(data) {
+        const root = { name: data.title, children: [] };
+        data.children.forEach(cat => {
+            const catNode = { name: cat.title, children: [] };
+            if (cat.children) {
+                cat.children.forEach(item => {
+                    if (item.children) {
+                        // Subcategory
+                        const subNode = { name: item.title, children: [] };
+                        item.children.forEach(task => {
+                            subNode.children.push({ name: task.title, done: task.status === 'done', refId: task.id });
+                        });
+                        catNode.children.push(subNode);
+                    } else {
+                        // Task
+                        catNode.children.push({ name: item.title, done: item.status === 'done', refId: item.id });
+                    }
+                });
+            }
+            root.children.push(catNode);
+        });
+        return root;
+    }
+
+    // Progress calculation across all nodes
+    function calculateProgress(data) {
+        let total = 0;
+        let completed = 0;
+        function traverse(node) {
+            if (node.status) {
+                total++;
+                if (node.status === 'done') completed++;
+            }
+            if (node.children) {
+                node.children.forEach(traverse);
+            }
+        }
+        traverse(data);
+        return { total, completed, percent: total === 0 ? 0 : Math.round((completed / total) * 100) };
+    }
+
+    // React component for a linear progress bar
+    const ProgressBar = ({ value, max }) => {
+        const percent = Math.min(100, Math.max(0, (value / max) * 100));
+        return (
+            <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                <div
+                    className="h-full gauge-bar transition-all duration-500"
+                    style={{ width: `${percent}%` }}
+                />
+            </div>
+        );
+    };
+
+    // Status toggle icon button
+    const StatusToggle = ({ status, onToggle }) => {
+        const isDone = status === 'done';
+        return (
+            <button
+                onClick={(e) => { e.stopPropagation(); onToggle(); }}
+                className={`p-1 rounded-full transition-all ${isDone ? 'text-green-400 hover:text-green-300' : 'text-slate-600 hover:text-blue-400'}`}
+            >
+                {isDone ? <Icons.CheckCircle2 size={20} /> : <Icons.Circle size={20} />}
+            </button>
+        );
+    };
+
+    // Component to render the D3 network
+    const NetworkGraph = ({ projectData, onTaskToggle }) => {
+        const ref = React.useRef(null);
+        // Build tree and flatten it into nodes and links
+        function buildGraphData(tree) {
+            const nodes = [];
+            const links = [];
+            let index = 0;
+            function recurse(node, parent) {
+                const current = { ...node, id: index++ };
+                nodes.push(current);
+                if (parent) {
+                    links.push({ source: parent.id, target: current.id });
+                }
+                if (node.children) {
+                    node.children.forEach(child => recurse(child, current));
+                }
+            }
+            recurse(tree, null);
+            return { nodes, links };
+        }
+        React.useEffect(() => {
+            const container = d3.select(ref.current);
+            container.selectAll('*').remove();
+            const tree = buildTreeFromProject(projectData);
+            const { nodes, links } = buildGraphData(tree);
+            const width = ref.current.clientWidth;
+            const height = ref.current.clientHeight;
+            const svg = container.append('svg')
+                .attr('width', width)
+                .attr('height', height);
+            const g = svg.append('g');
+            // Zoom and pan
+            svg.call(d3.zoom()
+                .scaleExtent([0.5, 3])
+                .on('zoom', (event) => {
+                    g.attr('transform', event.transform);
+                }));
+            // Draw links
+            const link = g.selectAll('.link')
+                .data(links)
+                .enter()
+                .append('line')
+                .attr('class', 'link')
+                .attr('stroke', 'rgba(102,204,255,0.4)')
+                .attr('stroke-width', 1.5);
+            // Draw nodes
+            const node = g.selectAll('.node')
+                .data(nodes)
+                .enter()
+                .append('g')
+                .attr('class', 'node')
+                .call(d3.drag()
+                    .on('start', (event, d) => {
+                        if (!event.active) simulation.alphaTarget(0.3).restart();
+                        d.fx = d.x;
+                        d.fy = d.y;
+                    })
+                    .on('drag', (event, d) => {
+                        d.fx = event.x;
+                        d.fy = event.y;
+                    })
+                    .on('end', (event, d) => {
+                        if (!event.active) simulation.alphaTarget(0);
+                        d.fx = null;
+                        d.fy = null;
+                    })
+                );
+            node.append('circle')
+                .attr('r', d => d.children ? 20 : 12)
+                .attr('fill', d => {
+                    if (d.children) return '#003d66';
+                    return d.done ? '#046a4f' : '#5a003e';
+                })
+                .attr('stroke', d => {
+                    if (d.children) return '#66ccff';
+                    return d.done ? '#00d29a' : '#ff4090';
+                })
+                .attr('stroke-width', 2)
+                .on('click', (event, d) => {
+                    // If leaf with refId, toggle status
+                    if (!d.children && d.refId) {
+                        onTaskToggle(d.refId);
+                    }
+                });
+            node.append('text')
+                .attr('dy', -22)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '11px')
+                .style('fill', '#a7f3ff')
+                .text(d => d.name)
+                .each(function(d) {
+                    // wrap long text
+                    const words = d.name.split(/\s+/);
+                    if (words.length > 3 || d.name.length > 16) {
+                        const el = d3.select(this);
+                        el.text('');
+                        const parts = d.name.match(/.{1,16}/g) || [d.name];
+                        parts.forEach((p, i) => {
+                            el.append('tspan')
+                                .text(p.trim())
+                                .attr('x', 0)
+                                .attr('dy', i === 0 ? 0 : 12);
+                        });
+                    }
+                });
+            // Force simulation
+            const simulation = d3.forceSimulation(nodes)
+                .force('link', d3.forceLink(links).id(d => d.id).distance(80))
+                .force('charge', d3.forceManyBody().strength(-200))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .on('tick', () => {
+                    link
+                        .attr('x1', d => d.source.x)
+                        .attr('y1', d => d.source.y)
+                        .attr('x2', d => d.target.x)
+                        .attr('y2', d => d.target.y);
+                    node
+                        .attr('transform', d => `translate(${d.x},${d.y})`);
+                });
+        }, [projectData, onTaskToggle]);
+        return <div ref={ref} className="w-full h-full"></div>;
+    };
+
+    // Main Application Component
+    const App = () => {
+        const [project, setProject] = React.useState(INITIAL_DATA);
+        const [viewStack, setViewStack] = React.useState([]);
+        const [showMap, setShowMap] = React.useState(false);
+        const [showPrompt, setShowPrompt] = React.useState(false);
+        const [prompt, setPrompt] = React.useState('');
+        const [loading, setLoading] = React.useState(false);
+
+        // Calculate progress from project data
+        const stats = React.useMemo(() => calculateProgress(project), [project]);
+
+        const currentView = viewStack.length > 0 ? viewStack[viewStack.length - 1] : project;
+        const isRoot = viewStack.length === 0;
+
+        // Toggle status of a task by ID
+        const toggleStatusById = (targetId) => {
+            const newProject = JSON.parse(JSON.stringify(project));
+            const updateNode = (node) => {
+                if (node.id === targetId) {
+                    node.status = node.status === 'done' ? 'pending' : 'done';
+                    return true;
+                }
+                if (node.children) {
+                    for (const child of node.children) {
+                        if (updateNode(child)) return true;
+                    }
+                }
+                return false;
+            };
+            updateNode(newProject);
+            setProject(newProject);
+        };
+
+        // Zoom into submodule in grid view
+        const handleZoomIn = (node) => {
+            if (node.children && node.children.length > 0) {
+                setViewStack([...viewStack, node]);
+            }
+        };
+        // Navigate back in grid view
+        const handleZoomOut = () => {
+            setViewStack(viewStack.slice(0, -1));
+        };
+
+        // Stubbed plan generation (for demonstration only)
+        const generateNewPlan = async () => {
+            if (!prompt.trim()) return;
+            setLoading(true);
+            try {
+                // As API is not configured, we create a simple plan from prompt
+                const rootTitle = prompt;
+                const categories = ['Preparation', 'Execution', 'Launch'];
+                const newData = {
+                    id: 'root',
+                    title: rootTitle,
+                    description: '',
+                    children: categories.map((cat, idx) => ({
+                        id: `gen_cat_${idx}`,
+                        title: cat,
+                        children: [
+                            { id: `gen_${idx}_1`, title: `${cat} Task 1`, status: 'pending' },
+                            { id: `gen_${idx}_2`, title: `${cat} Task 2`, status: 'pending' },
+                            { id: `gen_${idx}_3`, title: `${cat} Task 3`, status: 'pending' }
+                        ]
+                    }))
+                };
+                setProject(newData);
+                setViewStack([]);
+                setShowPrompt(false);
+                setPrompt('');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        return (
+            <div className="w-full h-screen bg-grid flex flex-col relative text-blue-100 selection:bg-blue-500 selection:text-white">
+                <div className="scanline"></div>
+                {/* Header */}
+                <header className="flex justify-between items-center p-4 border-b border-blue-900/50 bg-slate-900/80 backdrop-blur-sm z-10">
+                    <div className="flex items-center gap-3">
+                        <Icons.Activity className="text-blue-400 animate-pulse" />
+                        <div>
+                            <h1 className="text-xl font-bold tracking-widest text-blue-400 uppercase">Project Planner</h1>
+                            <div className="text-xs text-blue-600">SYS.VER.2.4.0 // ONLINE</div>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-6">
+                        <div className="hidden md:flex flex-col w-48">
+                            <div className="flex justify-between text-xs mb-1 text-blue-300">
+                                <span>SYSTEM INTEGRITY</span>
+                                <span>{stats.percent}%</span>
+                            </div>
+                            <ProgressBar value={stats.completed} max={stats.total} />
+                        </div>
+                        <button
+                            onClick={() => setShowPrompt(!showPrompt)}
+                            className="flex items-center gap-2 px-3 py-1 border border-blue-500/30 hover:bg-blue-900/40 rounded text-sm transition-colors text-blue-300"
+                        >
+                            <Icons.RefreshCw size={14} />
+                            REBOOT / NEW
+                        </button>
+                        <button
+                            onClick={() => setShowMap(!showMap)}
+                            className="flex items-center gap-2 px-3 py-1 border border-blue-500/30 hover:bg-blue-900/40 rounded text-sm transition-colors text-blue-300"
+                        >
+                            <Icons.Map size={16} />
+                            {showMap ? 'GRID VIEW' : 'MAP VIEW'}
+                        </button>
+                    </div>
+                </header>
+                {/* Main Content */}
+                <main className="flex-1 overflow-hidden relative flex flex-col p-6">
+                    {/* Breadcrumbs for grid view */}
+                    {!showMap && !isRoot && (
+                        <div className="mb-4 flex items-center gap-2 z-10 animate-in fade-in slide-in-from-left-4 duration-300">
+                            <button
+                                onClick={handleZoomOut}
+                                className="flex items-center gap-1 text-blue-400 hover:text-white transition-colors bg-slate-900/50 px-3 py-1 rounded border border-blue-800"
+                            >
+                                <Icons.ChevronLeft size={16} />
+                                BACK
+                            </button>
+                            <span className="text-slate-500">/</span>
+                            <span className="text-blue-200 font-bold uppercase tracking-wider">{currentView.title}</span>
+                        </div>
+                    )}
+                    {/* Grid or Map view */}
+                    {showMap ? (
+                        <div className="flex-1 border border-blue-900/40 rounded-lg bg-slate-900/60 backdrop-blur-sm relative">
+                            <NetworkGraph projectData={project} onTaskToggle={toggleStatusById} />
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-min overflow-y-auto pb-20 z-0">
+                            {currentView.children?.map((node) => (
+                                <div
+                                    key={node.id}
+                                    onClick={() => handleZoomIn(node)}
+                                    className={`group relative p-5 bg-slate-900/60 backdrop-blur-md rounded-lg border border-blue-500/20 transition-all duration-300 ${node.children ? 'cursor-pointer hover:-translate-y-1' : ''}`}
+                                >
+                                    {/* Decorative corners */}
+                                    <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-blue-500"></div>
+                                    <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-blue-500"></div>
+                                    {/* Header */}
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div className="flex items-center gap-3">
+                                            {node.icon && Icons[node.icon] ? (
+                                                React.createElement(Icons[node.icon], { className: "text-blue-400", size: 24 })
+                                            ) : (
+                                                <div className={`w-2 h-2 rounded-full ${node.status === 'done' ? 'bg-green-500' : 'bg-blue-500'}`}></div>
+                                            )}
+                                            <h3 className="font-bold text-lg text-blue-100">{node.title}</h3>
+                                        </div>
+                                        {/* Status for leaf */}
+                                        {!node.children && (
+                                            <StatusToggle status={node.status} onToggle={() => toggleStatusById(node.id)} />
+                                        )}
+                                        {node.children && (
+                                            <Icons.Layers3 size={16} className="text-blue-800 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        )}
+                                    </div>
+                                    {/* Description */}
+                                    <p className="text-sm text-slate-400 mb-4 line-clamp-2 h-10">
+                                        {node.description || (node.children ? `${node.children.length} sub-modules active` : 'System file ready.')}
+                                    </p>
+                                    {/* Child preview */}
+                                    {node.children && (
+                                        <div className="space-y-1 mt-2">
+                                            {node.children.slice(0, 3).map(child => (
+                                                <div key={child.id} className="flex items-center gap-2 text-xs text-slate-500">
+                                                    <div className={`w-1 h-1 rounded-full ${child.status === 'done' ? 'bg-green-500' : 'bg-slate-600'}`}></div>
+                                                    <span className="truncate">{child.title}</span>
+                                                </div>
+                                            ))}
+                                            {node.children.length > 3 && (
+                                                <div className="text-xs text-blue-500/70 pl-3">+ {node.children.length - 3} more...</div>
+                                            )}
+                                        </div>
+                                    )}
+                                    {/* Progress bar for cluster */}
+                                    {node.children && (
+                                        <div className="mt-4">
+                                            <div className="h-1 w-full bg-slate-800 rounded overflow-hidden">
+                                                <div
+                                                    className="h-full bg-blue-600"
+                                                    style={{ width: `${(node.children.filter(c => c.status === 'done').length / node.children.length) * 100}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {/* Generator modal */}
+                    {showPrompt && (
+                        <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+                            <div className="w-full max-w-lg bg-slate-900 border border-blue-500 p-6 rounded-lg shadow-2xl relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent animate-pulse"></div>
+                                <h2 className="text-xl font-bold text-blue-400 mb-4 flex items-center gap-2">
+                                    <Icons.Brain size={20} />
+                                    GENERATE NEW ARCHITECTURE
+                                </h2>
+                                <p className="text-sm text-slate-400 mb-4">
+                                    Describe your project. A simple generator will construct the node map automatically.
+                                </p>
+                                <textarea
+                                    value={prompt}
+                                    onChange={(e) => setPrompt(e.target.value)}
+                                    placeholder="e.g., Build a garden shed with planning, construction, finishing..."
+                                    className="w-full bg-slate-800 border border-slate-700 rounded p-3 text-white focus:outline-none focus:border-blue-500 h-32 mb-4 resize-none font-mono text-sm"
+                                />
+                                <div className="flex justify-end gap-3">
+                                    <button
+                                        onClick={() => { setShowPrompt(false); setPrompt(''); }}
+                                        className="px-4 py-2 text-slate-400 hover:text-white transition-colors"
+                                    >
+                                        CANCEL
+                                    </button>
+                                    <button
+                                        onClick={generateNewPlan}
+                                        disabled={loading || !prompt.trim()}
+                                        className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded font-bold transition-all disabled:opacity-50 flex items-center gap-2"
+                                    >
+                                        {loading ? <Icons.RefreshCw className="animate-spin" size={16} /> : <Icons.Zap size={16} />}
+                                        {loading ? 'GENERATING...' : 'INITIALIZE'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </main>
+                <footer className="p-2 bg-slate-900 border-t border-blue-900/30 text-center text-[10px] text-slate-600 font-mono">
+                    PROJECT PLANNER MODULE // COMBINED VIEW // CLICK NODES TO TOGGLE TASKS
+                </footer>
+            </div>
+        );
+    };
+    ReactDOM.createRoot(document.getElementById('app')).render(<App />);
+    </script>
+</body>
+</html>

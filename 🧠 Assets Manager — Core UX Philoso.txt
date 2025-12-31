@@ -1,0 +1,226 @@
+🧠 Assets Manager — Core UX Philosophy
+
+One rule:
+
+If it doesn’t go through the Vault, it doesn’t exist.
+
+So the UI never edits apps, never shows secrets, never executes directly.
+It observes, authorizes, and commands.
+
+🧱 High-Level Layout (Mental Model)
+4
+┌──────────────────────────┐
+│ Top Bar (Status + Vault) │
+├──────────┬───────────────┤
+│ Sidebar  │ Main Panel    │
+│ (Assets) │ (Contextual)  │
+└──────────┴───────────────┘
+
+
+Dark, calm, technical.
+No consumer fluff. This is a cockpit.
+
+1️⃣ Top Bar — System Truth
+
+Always visible. Never hidden.
+
+Elements
+
+🟢 Vault Status: SECURE / DEGRADED / LOCKED
+
+🔐 Auth Identity: Founder
+
+🧠 Active Runtime Count
+
+📡 Live Event Pulse (subtle)
+
+Why
+
+You should feel the system breathing.
+
+2️⃣ Sidebar — Asset-First Navigation
+Sections
+▸ Assets
+▸ Ingest
+▸ Vault
+▸ Activity
+▸ System
+
+
+Each section maps 1-to-1 with Vault capabilities.
+
+No feature sprawl.
+
+3️⃣ Ingest Screen — “Absorb an App”
+
+This is where the magic happens.
+
+UI Flow
+
+Upload Folder / Zip
+
+Click “Scan Only”
+
+Review detected intent
+
+Click “Bind to Vault”
+
+Scan Results Panel
+Detected:
+✓ Gemini AI usage
+✓ Hybrid runtime
+✓ 3 entry points
+✓ No hardcoded secrets
+
+Requested capabilities:
+• ai.gemini.inference
+
+
+No build.
+No warnings unless critical.
+Vault stays in control.
+
+4️⃣ Assets List — Managed Reality
+
+This is your living Codex.
+
+Asset Card
+[ APP NAME ]
+Status: Managed
+Runtime: Hybrid
+AI: Gemini
+Permissions: 1
+Last Event: 12s ago
+
+Actions (Founder-Only)
+
+▶ Start
+
+⏸ Pause
+
+🔒 Lock
+
+📡 View Logs
+
+⚙ Permissions
+
+No delete button by default.
+Destruction should be intentional.
+
+5️⃣ Asset Detail View — Control Without Touching
+Tabs
+Overview | Permissions | Runtime | Logs | Health
+
+Overview
+
+Asset hash (immutable)
+
+Runtime type
+
+Ingest timestamp
+
+Linked providers
+
+Permissions
+
+Toggle capabilities, not keys:
+
+[✓] ai.gemini.inference
+[ ] ai.image.generate
+[ ] ai.voice.tts
+
+Runtime
+
+Start / stop shell
+
+Restart safely
+
+Inject config (via Vault only)
+
+6️⃣ Vault Screen — Secrets Without Exposure
+
+This screen never shows keys.
+
+Shows
+
+Providers registered
+
+Apps using each provider
+
+Usage metrics
+
+Rotation status
+
+Example:
+
+Gemini API
+Used by: 4 assets
+Status: Healthy
+Rotation: 14 days ago
+
+
+Buttons:
+
+Rotate
+
+Pause provider
+
+Revoke per app
+
+7️⃣ Activity Stream — Immutable Truth
+
+Chronological, append-only:
+
+[12:44] Asset X requested ai.gemini.inference → APPROVED
+[12:43] Asset Y shell started
+[12:41] Gemini key rotated
+
+
+This becomes:
+
+Audit trail
+
+Debug tool
+
+Proof of control
+
+8️⃣ System Screen — The Kill Switch Layer
+
+Founder-only, dangerous by design.
+
+Controls
+
+Lock all assets
+
+Pause Vault outbound traffic
+
+Disable provider globally
+
+Emergency shutdown
+
+This is your “Most High” panel.
+Minimal. Deliberate. Hard to misclick.
+
+🧬 Why This UI Works With the Ingest Engine
+
+Ingest Engine handles understanding
+
+Vault handles authority
+
+Assets Manager handles decision
+
+Each layer does one job.
+
+No overlap. No leakage.
+
+🎯 What this UI Enables Immediately
+
+One-click Gemini app onboarding
+
+Infinite scaling without chaos
+
+Zero secret exposure
+
+Founder-only sovereignty
+
+SaaS-ready later (roles already implied)
