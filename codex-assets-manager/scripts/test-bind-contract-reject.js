@@ -11,6 +11,9 @@ async function testBindRejectFlow() {
   const matchEligibility = {
     ingestId: 'ingest_bad123',
     eligible: false,
+    issuer: 'codex-builder',
+    audience: 'app',
+    policy_flags: {},
     squad: [],
     formations: [],
     clearance: [],
