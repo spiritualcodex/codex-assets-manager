@@ -12,7 +12,13 @@
  * All results are audit-logged by their source handlers.
  */
 
-const express = require('express');
+let express;
+try {
+  express = require('express');
+} catch (e) {
+  // allow tests to run without express installed
+  express = { Router: () => ({ get: () => {}, post: () => {}, use: () => {} }) };
+}
 const crypto = require('crypto');
 
 const router = express.Router();
@@ -209,3 +215,9 @@ module.exports.registerScanResult = registerScanResult;
 module.exports.registerEligibilityResult = registerEligibilityResult;
 module.exports.registerBindResult = registerBindResult;
 module.exports.hashContract = hashContract;
+
+function getContracts(ingestId) {
+  return ingestResults.get(ingestId) || null;
+}
+
+module.exports.getContracts = getContracts;

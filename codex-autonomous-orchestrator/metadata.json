@@ -1,0 +1,8 @@
+
+{
+  "name": "Codex Autonomous Orchestrator",
+  "description": "A sophisticated tool orchestrator powered by Gemini that selects and organizes developer tools for complex missions.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

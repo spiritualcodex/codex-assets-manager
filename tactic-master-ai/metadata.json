@@ -1,0 +1,7 @@
+{
+  "name": "Tactic Master AI",
+  "description": "Next-gen football management simulation featuring Gemini Live Assistant for real-time tactical advice and Veo for generating match highlights.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

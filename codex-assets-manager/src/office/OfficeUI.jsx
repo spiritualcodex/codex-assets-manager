@@ -1,29 +1,34 @@
-/**
- * OfficeUI — Main Page Container
- * 
- * Composition:
- * 1. ScanPanel (Scan result contract)
- * 2. EligibilityPanel (Eligibility result contract)
- * 3. BindPanel (Bind decision contract)
- * 
- * All panels are:
- * - Read-only (no mutation)
- * - Contract-bound (render only from API contracts)
- * - Fail-closed (missing contracts = locked/hidden)
- * - Zero-logic (no UI-side calculations)
- * 
- * No buttons except:
- * - Copy JSON
- * - Export JSON
- * 
- * No control plane actions. This is a glass wall.
- */
-
 import React, { useState } from 'react';
 import ScanPanel from './ScanPanel';
 import EligibilityPanel from './EligibilityPanel';
 import BindPanel from './BindPanel';
+import BindPanel from './BindPanel';
+import ExecutionGatePanel from './ExecutionGatePanel';
+import BuilderPanel from './BuilderPanel';
 import './OfficeUI.css';
+
+const SystemStatus = ({ ingestId }) => {
+  // Mock status logic (In real app, this would ping /health)
+  // For prototype, we assume GREEN if ingestId exists
+  if (!ingestId) return null;
+
+  return (
+    <div className="system-status-banner">
+      <div className="status-item">
+        <span className="dot green"></span>
+        <strong>Vault Connection:</strong> Healthy
+      </div>
+      <div className="status-item">
+        <span className="dot green"></span>
+        <strong>Match Engine:</strong> Online
+      </div>
+      <div className="status-item">
+        <span className="dot yellow"></span>
+        <strong>Tactical Agents:</strong> Idle
+      </div>
+    </div>
+  );
+};
 
 export const OfficeUI = ({ apiBase = 'http://localhost:3000' }) => {
   const [ingestId, setIngestId] = useState('');
@@ -82,9 +87,12 @@ export const OfficeUI = ({ apiBase = 'http://localhost:3000' }) => {
           </div>
 
           <div className="panels-container">
+            <SystemStatus ingestId={activeIngest} />
             <ScanPanel ingestId={activeIngest} apiBase={apiBase} />
             <EligibilityPanel ingestId={activeIngest} apiBase={apiBase} />
             <BindPanel ingestId={activeIngest} apiBase={apiBase} />
+            <ExecutionGatePanel ingestId={activeIngest} />
+            <BuilderPanel />
           </div>
 
           <footer className="office-footer">

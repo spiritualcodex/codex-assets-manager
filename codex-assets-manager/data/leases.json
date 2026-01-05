@@ -1,0 +1,171 @@
+[
+  {
+    "lease_id": "lease-active",
+    "contract_id": "phase4-consume",
+    "scopes": [
+      "ai.openai.inference"
+    ],
+    "issued_at": "2026-01-01T13:09:45.782Z",
+    "expires_at": "2026-01-01T13:10:45.782Z",
+    "revocable": true,
+    "status": "active",
+    "hash_fingerprint": "hash",
+    "issuer": "codex-builder"
+  },
+  {
+    "lease_id": "lease-revoked",
+    "contract_id": "phase4-consume",
+    "scopes": [
+      "ai.openai.inference"
+    ],
+    "issued_at": "2026-01-01T13:09:45.789Z",
+    "expires_at": "2026-01-01T13:09:44.789Z",
+    "revocable": true,
+    "status": "revoked",
+    "hash_fingerprint": "hash",
+    "issuer": "codex-builder"
+  },
+  {
+    "lease_id": "lease-expired",
+    "contract_id": "phase4-consume",
+    "scopes": [
+      "ai.openai.inference"
+    ],
+    "issued_at": "2026-01-01T13:09:45.791Z",
+    "expires_at": "2026-01-01T13:09:44.791Z",
+    "revocable": true,
+    "status": "active",
+    "hash_fingerprint": "hash",
+    "issuer": "codex-builder"
+  },
+  {
+    "lease_id": "lease-bad-contract",
+    "contract_id": "unknown",
+    "scopes": [
+      "ai.openai.inference"
+    ],
+    "issued_at": "2026-01-01T13:09:45.797Z",
+    "expires_at": "2026-01-01T13:09:46.797Z",
+    "revocable": true,
+    "status": "active",
+    "hash_fingerprint": "hash",
+    "issuer": "codex-builder"
+  },
+  {
+    "lease_id": "lease-active",
+    "contract_id": "phase4-consume",
+    "scopes": [
+      "ai.openai.inference"
+    ],
+    "issued_at": "2026-01-01T13:36:18.249Z",
+    "expires_at": "2026-01-01T13:37:18.249Z",
+    "revocable": true,
+    "status": "active",
+    "hash_fingerprint": "hash",
+    "issuer": "codex-builder"
+  },
+  {
+    "lease_id": "lease-active-mjvhock0",
+    "contract_id": "phase4-consume",
+    "scopes": [
+      "ai.openai.inference"
+    ],
+    "issued_at": "2026-01-01T13:36:55.442Z",
+    "expires_at": "2026-01-01T13:37:55.442Z",
+    "revocable": true,
+    "status": "active",
+    "hash_fingerprint": "hash",
+    "issuer": "codex-builder"
+  },
+  {
+    "lease_id": "lease-revoked-mjvhock0",
+    "contract_id": "phase4-consume",
+    "scopes": [
+      "ai.openai.inference"
+    ],
+    "issued_at": "2026-01-01T13:36:55.449Z",
+    "expires_at": "2026-01-01T13:36:54.449Z",
+    "revocable": true,
+    "status": "revoked",
+    "hash_fingerprint": "hash",
+    "issuer": "codex-builder"
+  },
+  {
+    "lease_id": "lease-expired-mjvhock0",
+    "contract_id": "phase4-consume",
+    "scopes": [
+      "ai.openai.inference"
+    ],
+    "issued_at": "2026-01-01T13:36:55.451Z",
+    "expires_at": "2026-01-01T13:36:54.451Z",
+    "revocable": true,
+    "status": "active",
+    "hash_fingerprint": "hash",
+    "issuer": "codex-builder"
+  },
+  {
+    "lease_id": "lease-bad-contract-mjvhock0",
+    "contract_id": "unknown",
+    "scopes": [
+      "ai.openai.inference"
+    ],
+    "issued_at": "2026-01-01T13:36:55.457Z",
+    "expires_at": "2026-01-01T13:36:56.457Z",
+    "revocable": true,
+    "status": "active",
+    "hash_fingerprint": "hash",
+    "issuer": "codex-builder"
+  },
+  {
+    "lease_id": "lease-active-mjvig253",
+    "contract_id": "phase4-consume",
+    "scopes": [
+      "ai.openai.inference"
+    ],
+    "issued_at": "2026-01-01T13:58:28.312Z",
+    "expires_at": "2026-01-01T13:59:28.312Z",
+    "revocable": true,
+    "status": "active",
+    "hash_fingerprint": "hash",
+    "issuer": "codex-builder"
+  },
+  {
+    "lease_id": "lease-revoked-mjvig253",
+    "contract_id": "phase4-consume",
+    "scopes": [
+      "ai.openai.inference"
+    ],
+    "issued_at": "2026-01-01T13:58:28.319Z",
+    "expires_at": "2026-01-01T13:58:27.319Z",
+    "revocable": true,
+    "status": "revoked",
+    "hash_fingerprint": "hash",
+    "issuer": "codex-builder"
+  },
+  {
+    "lease_id": "lease-expired-mjvig253",
+    "contract_id": "phase4-consume",
+    "scopes": [
+      "ai.openai.inference"
+    ],
+    "issued_at": "2026-01-01T13:58:28.321Z",
+    "expires_at": "2026-01-01T13:58:27.321Z",
+    "revocable": true,
+    "status": "active",
+    "hash_fingerprint": "hash",
+    "issuer": "codex-builder"
+  },
+  {
+    "lease_id": "lease-bad-contract-mjvig253",
+    "contract_id": "unknown",
+    "scopes": [
+      "ai.openai.inference"
+    ],
+    "issued_at": "2026-01-01T13:58:28.327Z",
+    "expires_at": "2026-01-01T13:58:29.327Z",
+    "revocable": true,
+    "status": "active",
+    "hash_fingerprint": "hash",
+    "issuer": "codex-builder"
+  }
+]
