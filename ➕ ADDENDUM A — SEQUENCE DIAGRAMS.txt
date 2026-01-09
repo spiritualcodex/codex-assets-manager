@@ -1,0 +1,218 @@
+➕ ADDENDUM A — SEQUENCE DIAGRAMS
+
+(Applies to Tactical Manager + Codex Office)
+
+You can paste this whole section into either:
+
+TACTICAL_MANAGER.md (recommended), or
+
+a new SEQUENCES.md
+
+A1. Match Execution Flow (UI → Engine → UI)
+sequenceDiagram
+    participant UI as React Tactical Manager UI
+    participant BE as codex-cloud-backend
+    participant ENG as tactical-simulation-engine
+
+    UI->>BE: POST /engine/match (match intent)
+    BE->>ENG: simulateMatch(payload)
+    ENG-->>ENG: Run match logic
+    ENG-->>BE: MatchResult + UpdatedLeague
+    BE-->>UI: 200 OK (MatchResult)
+    UI-->>UI: Render score
+    UI-->>UI: Refresh league table
+
+
+Key rules illustrated
+
+UI sends intent only
+
+Engine is the single authority
+
+League table is never calculated in UI
+
+A2. League Table Fetch / Refresh Flow
+sequenceDiagram
+    participant UI as React UI
+    participant BE as codex-cloud-backend
+    participant ENG as tactical-simulation-engine
+
+    UI->>BE: GET /engine/league
+    BE->>ENG: getLeagueState()
+    ENG-->>BE: LeagueTable
+    BE-->>UI: LeagueTable payload
+    UI-->>UI: Render table
+
+
+Notes
+
+This runs:
+
+on app load
+
+after every match
+
+No caching logic required in UI (yet)
+
+A3. Season Progression Flow
+sequenceDiagram
+    participant UI as React UI
+    participant BE as codex-cloud-backend
+    participant ENG as tactical-simulation-engine
+
+    UI->>BE: POST /engine/season/run
+    BE->>ENG: runSeason()
+    ENG-->>ENG: Simulate fixtures
+    ENG-->>BE: SeasonSnapshot
+    BE-->>UI: SeasonSnapshot
+    UI-->>UI: Update summary + timeline
+
+A4. Harness Observation Flow (Phase 13)
+sequenceDiagram
+    participant UI as HarnessScreen
+    participant WS as WebSocket
+    participant ENG as Simulation Engine
+
+    ENG-->>WS: EngineStatus
+    ENG-->>WS: MatchEvent
+    ENG-->>WS: ValidationResult
+    WS-->>UI: Stream events
+    UI-->>UI: Update status pills
+    UI-->>UI: Append event log
+
+
+Important
+
+Harness is observational
+
+Harness does not mutate state
+
+Harness reflects what already happened
+
+➕ ADDENDUM B — UI-ONLY WIRING CHECKLIST
+
+(Locked scope – React work only)
+
+You can paste this into:
+
+TACTICAL_MANAGER.md → “Current Focus”
+or
+
+a standalone UI_WIRING_CHECKLIST.md
+
+B1. Hard Rules (Do Not Violate)
+
+❌ No engine logic in UI
+
+❌ No table math in UI
+
+❌ No derived standings in UI
+
+❌ No persistence logic
+
+❌ No direct engine imports
+
+UI = fetch + render + react
+
+B2. Required Endpoints (Already Exist)
+Purpose	Method	Endpoint
+Play match	POST	/engine/match
+Get league	GET	/engine/league
+Run season	POST	/engine/season/run
+Get snapshot	GET	/engine/season/snapshot
+
+UI must treat responses as authoritative truth.
+
+B3. Match Screen Wiring
+Must Do
+
+ Button triggers POST /engine/match
+
+ Disable button while pending
+
+ Display result payload directly
+
+ On success → trigger league refresh
+
+Must NOT Do
+
+ ❌ Calculate score
+
+ ❌ Infer winner
+
+ ❌ Update table locally
+
+B4. League Table Wiring
+Must Do
+
+ Fetch via /engine/league
+
+ Render rows from payload
+
+ Refresh after every match
+
+ Handle empty / loading state
+
+Must NOT Do
+
+ ❌ Sort manually (unless engine sends unsorted)
+
+ ❌ Recalculate points
+
+ ❌ Store derived state
+
+B5. Season Screens Wiring
+Season Summary
+
+ Consume SeasonSnapshot
+
+ Display metadata only
+
+Season Timeline
+
+ Render ordered events
+
+ No timeline math in UI
+
+B6. Harness Wiring (Already Done, Verify Only)
+
+ WebSocket connection hook
+
+ Status pills update from events
+
+ Payload toggles
+
+ Event log append-only
+
+ No command side-effects
+
+B7. Error Handling (UI Scope)
+
+ Network error → banner
+
+ Engine error → banner + log
+
+ Validation fail → visible state
+
+ Never swallow engine errors
+
+B8. Definition of “Done”
+
+UI wiring is complete when:
+
+✅ Match → result → league refresh works
+
+✅ No duplicated logic
+
+✅ Harness reflects truth
+
+✅ Engine untouched
+
+✅ UI can be swapped without breaking engine
+
+Final Lock Statement
+
+If the engine changes, the UI adapts.
+If the UI changes, the engine does not care.
+
+That rule stays.

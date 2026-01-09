@@ -1,0 +1,185 @@
+⚽ TACTICAL_MANAGER.md
+
+Tactical Manager – Simulation & UI Contract
+
+Scope: Football simulation UI + engine integration
+Non-scope: Office shell, diagnostics UI
+
+1. Tactical Manager – Purpose
+
+Tactical Manager is a deterministic football simulation system.
+
+It supports:
+
+Match simulation
+
+League tables
+
+Season progression
+
+Career advancement
+
+Timeline & hierarchy views
+
+It is engine-driven, not UI-driven.
+
+2. Core Architecture (Locked)
+[ React Tactical Manager UI ]
+            ↓
+[ codex-cloud-backend ]
+            ↓
+[ tactical-simulation-engine ]
+
+Rules
+
+❌ No database
+
+❌ No Gemini / LLM
+
+❌ No UI-side computation
+
+✅ Engine is authoritative
+
+✅ UI consumes contracts only
+
+3. Simulation Engine (Authoritative)
+Location
+simulation-engine/
+
+Responsibilities
+
+Match simulation
+
+Season execution
+
+Event emission
+
+League table calculation
+
+Timeline generation
+
+Key Files
+File	Purpose
+engine.ts	Engine bootstrap
+engineController.ts	High-level orchestration
+simulateMatch.ts	Match logic
+simulateSeason.ts	Season logic
+runSeason.ts	Execution wrapper
+seasonRunner.ts	Season lifecycle
+eventBus.ts	Internal pub/sub
+events.ts	Event contracts
+matchEvents.ts	Match-specific events
+transport/websocketServer.ts	Live updates
+types.ts	Engine types
+4. React UI – Tactical Screens
+Routes & Screens
+src/routes/
+ ├─ CareerHubRoute.tsx
+ ├─ FixturesResultsRoute.tsx
+ ├─ LeagueHierarchyRoute.tsx
+ ├─ LeagueTableRoute.tsx
+ ├─ SeasonSummaryRoute.tsx
+ └─ SeasonTimelineRoute.tsx
+
+src/screens/
+ ├─ CareerHub/
+ ├─ FixturesResults/
+ ├─ LeagueHierarchy/
+ ├─ LeagueTable/
+ ├─ SeasonSummary/
+ └─ SeasonTimeline/
+
+Status
+Screen	Status
+Career Hub	UI complete
+Fixtures & Results	UI complete
+League Table	UI complete
+League Hierarchy	UI complete
+Season Summary	UI complete
+Season Timeline	UI complete
+5. Data Contracts (Locked)
+
+Defined in:
+
+src/types/contracts.ts
+
+
+Mocks available in:
+
+src/mocks/data/
+
+
+Includes:
+
+LeagueTable
+
+SeasonSnapshot
+
+SeasonSave
+
+SeasonTimeline
+
+LeagueHierarchyGraph
+
+These shapes are authoritative for the UI.
+
+6. Match Flow (End-to-End)
+
+UI triggers match intent
+
+Backend forwards to engine
+
+Engine simulates match
+
+Engine updates league state
+
+Engine emits result
+
+UI re-renders:
+
+Match result
+
+League table
+
+Timeline / summary
+
+UI never calculates standings.
+
+7. What Tactical Manager Is NOT
+
+❌ CRUD app
+
+❌ Form-driven system
+
+❌ Persistent datastore
+
+❌ UI-heavy logic
+
+It is a simulation pipeline.
+
+8. Current Focus
+
+While DB-backed leagues are built later:
+
+React UI wiring continues
+
+League refresh loop finalised
+
+Harness validates behaviour
+
+Engine remains untouched
+
+9. Tactical Mental Model
+
+Engine = Referee + physics
+
+Tactical Manager UI = Scoreboards
+
+Codex Office = Manager’s box
+
+10. Status
+
+✅ Engine complete
+✅ UI screens complete
+✅ Contracts stable
+🔄 Final UI ↔ engine loop polish
